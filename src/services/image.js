@@ -1,47 +1,51 @@
-import {
-  CREATE_VIDEO,
-  DETECT_FACE,
-  REMOVE_BACKGROUND,
-  SOLID_FILL,
-} from "../api/apiEndPoints";
+import { IMAGES, SINGLE_IMAGE, UPLOAD_IMAGE } from "../api/apiEndPoints";
 import { apiSlice } from "../api/apiSlice";
 
 export const imageApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    removeBg: builder.mutation({
+    getImages: builder.query({
+      query: () => ({
+        url: IMAGES,
+        method: "GET",
+      }),
+    }),
+
+    getSingleImage: builder.query({
+      query: ({ id }) => ({
+        url: `${SINGLE_IMAGE}/${id}`,
+        method: "GET",
+      }),
+    }),
+
+    uploadImage: builder.mutation({
       query: (formData) => ({
-        url: REMOVE_BACKGROUND,
+        url: UPLOAD_IMAGE,
         method: "POST",
         body: formData,
       }),
     }),
-    solidFill: builder.mutation({
-      query: (formData) => ({
-        url: SOLID_FILL,
+
+    adjustImage: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `${SINGLE_IMAGE}/${id}`,
         method: "POST",
         body: formData,
       }),
     }),
-    detectFace: builder.mutation({
-      query: (formData) => ({
-        url: DETECT_FACE,
-        method: "POST",
-        body: formData,
-      }),
-    }),
-    createVideo: builder.mutation({
-      query: (formData) => ({
-        url: CREATE_VIDEO,
-        method: "POST",
-        body: formData,
+
+    deleteImage: builder.mutation({
+      query: ({ id }) => ({
+        url: `${SINGLE_IMAGE}/${id}`,
+        method: "DELETE",
       }),
     }),
   }),
 });
 
 export const {
-  useRemoveBgMutation,
-  useSolidFillMutation,
-  useDetectFaceMutation,
-  useCreateVideoMutation,
+  useGetImagesQuery,
+  useGetSingleImageQuery,
+  useUploadImageMutation,
+  useAdjustImageMutation,
+  useDeleteImageMutation,
 } = imageApiSlice;

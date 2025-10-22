@@ -2,7 +2,7 @@ const PATHS = {
   home: "/",
   notFound: "*",
   uploads: "/uploads",
-  uploadImage: "/uploads/:image",
+  uploadImage: "/uploads/:id",
 };
 
 const USER_FORM = {
@@ -29,10 +29,10 @@ const USER_FORM = {
       type: "email",
     },
     {
-      name: "phone_number",
+      name: "phone",
       label: "Phone number",
       placeholder: "Enter Phone Number",
-      type: "tel",
+      type: "number",
     },
   ],
 };

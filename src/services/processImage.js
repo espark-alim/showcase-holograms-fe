@@ -1,11 +1,11 @@
-import { SUBMIT_FORM } from "../api/apiEndPoints";
+import { SUBMIT_IMAGES } from "../api/apiEndPoints";
 import { apiSlice } from "../api/apiSlice";
 
 export const imageApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    addUser: builder.mutation({
+    submitImages: builder.mutation({
       query: (formData) => ({
-        url: SUBMIT_FORM,
+        url: SUBMIT_IMAGES,
         method: "POST",
         body: formData,
       }),
@@ -13,4 +13,4 @@ export const imageApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useAddUserMutation } = imageApiSlice;
+export const { useSubmitImagesMutation } = imageApiSlice;

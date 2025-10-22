@@ -69,15 +69,16 @@ let theme = createTheme({
       textTransform: "none",
       fontWeight: 600,
       boxShadow: 0,
+      letterSpacing: 1.5,
     },
   },
   breakpoints: {
     values: {
-      xs: 0, // Phones
-      sm: 425, // Small phones
-      md: 768, // Tablets
-      lg: 1440, // Laptops
-      xl: 1920, // Large desktops / Full HD
+      xs: 0,
+      sm: 425,
+      md: 768,
+      lg: 1440,
+      xl: 1920,
     },
   },
 });

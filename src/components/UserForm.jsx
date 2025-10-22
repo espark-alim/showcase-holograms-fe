@@ -11,7 +11,7 @@ const UserForm = () => {
     first_name: "",
     last_name: "",
     email: "",
-    phone_number: "",
+    phone: "",
   });
 
   const {
@@ -37,8 +37,13 @@ const UserForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const objToSend = {
+      ...user,
+      phone: user?.phone?.toString(),
+    };
+
     try {
-      const response = await addUser(user).unwrap();
+      const response = await addUser(objToSend).unwrap();
       console.log("User Data:", response);
       toast.success("User registered successfully!");
       localStorage.setItem("accessToken", "xyz");
