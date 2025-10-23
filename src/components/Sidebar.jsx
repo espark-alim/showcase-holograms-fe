@@ -1,0 +1,74 @@
+import { useMediaQuery, Box, Drawer } from "@mui/material";
+import SidebarLinks from "./SidebarLinks";
+
+const Sidebar = ({ isMobileSidebarOpen, onSidebarClose }) => {
+  const lgUp = useMediaQuery((theme) => theme.breakpoints.up("md"));
+
+  const sidebarWidth = 240;
+  const scrollbarStyles = {
+    "&::-webkit-scrollbar": {
+      width: "7px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: "#eff2f7",
+      borderRadius: "15px",
+    },
+  };
+
+  if (lgUp) {
+    return (
+      <Box
+        sx={{
+          width: sidebarWidth,
+          flexShrink: 0,
+        }}
+      >
+        {/* ------------------------------------------- */}
+        {/* Sidebar for desktop */}
+        {/* ------------------------------------------- */}
+        <Drawer
+          anchor="left"
+          open={true}
+          variant="permanent"
+          PaperProps={{
+            sx: {
+              width: sidebarWidth,
+              boxSizing: "border-box",
+              ...scrollbarStyles,
+              border: "0",
+              backgroundColor: "rgba(245, 246, 250, 1)",
+            },
+          }}
+        >
+          {/* ------------------------------------------- */}
+          {/* Sidebar Box */}
+          {/* ------------------------------------------- */}
+          <SidebarLinks />
+        </Drawer>
+      </Box>
+    );
+  }
+
+  return (
+    <Drawer
+      anchor="left"
+      open={isMobileSidebarOpen}
+      onClose={onSidebarClose}
+      variant="temporary"
+      PaperProps={{
+        sx: {
+          width: sidebarWidth,
+          boxShadow: (theme) => theme.shadows[8],
+          ...scrollbarStyles,
+        },
+      }}
+    >
+      {/* ------------------------------------------- */}
+      {/* Sidebar Box */}
+      {/* ------------------------------------------- */}
+      <SidebarLinks />
+    </Drawer>
+  );
+};
+
+export default Sidebar;

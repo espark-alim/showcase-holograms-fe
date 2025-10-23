@@ -22,7 +22,7 @@ const UserForm = () => {
     textFieldStyle,
     buttonStyle,
   } = USER_FORM_STYLE || {};
-  const { title, subTitle, feilds, buttonText } = USER_FORM || {};
+  const { title, subTitle, fields, buttonText } = USER_FORM || {};
   const navigate = useNavigate();
   const [addUser, { isLoading }] = useAddUserMutation();
 
@@ -64,7 +64,7 @@ const UserForm = () => {
       </Typography>
 
       <Box component="form" onSubmit={handleSubmit} sx={formStyle}>
-        {feilds.map((field) => (
+        {fields.map((field) => (
           <TextField
             key={field.name}
             name={field.name}
@@ -97,7 +97,7 @@ const UserForm = () => {
           disabled={isLoading}
           loading={isLoading}
         >
-          {isLoading ? "Submitting..." : buttonText}
+          {buttonText}
         </Button>
       </Box>
     </Paper>

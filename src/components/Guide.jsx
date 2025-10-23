@@ -8,13 +8,17 @@ const Guide = () => {
       justifyContent={"center"}
       alignItems={"center"}
     >
-      <Stack spacing={3} width={"85%"} maxWidth={500}>
+      <Stack spacing={3} width={"85%"} maxWidth={500} alignItems={"center"}>
         <Typography variant="body1" letterSpacing={1}>
           Drag to resize your photo so the faces are large, centered and fully
           within the red circle (Bodies can extend outside the circle, faces
           must stay within the circle)
         </Typography>
-        <Box component={"img"} src={GuidImage} sx={{ width: "100%" }} />
+        <Box
+          component={"img"}
+          src={GuidImage}
+          sx={{ mx: "auto", width: "85%", height: "fit-content" }}
+        />
       </Stack>
     </Stack>
   );

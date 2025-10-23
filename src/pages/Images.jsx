@@ -5,10 +5,18 @@ import Guide from "../components/Guide";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import * as faceapi from "face-api.js";
-import { useGetImagesQuery, useUploadImageMutation } from "../services/image";
+import {
+  useDeleteImageMutation,
+  useGetImagesQuery,
+  useUploadImageMutation,
+} from "../services/image";
 import { useSubmitImagesMutation } from "../services/processImage";
 
-const StandardImageList = ({ navigate, images = [] }) => {
+const StandardImageList = ({
+  navigate,
+  images = [],
+  handleDeleteImage = () => {},
+}) => {
   return (
     <Box
       sx={{
@@ -74,6 +82,7 @@ const StandardImageList = ({ navigate, images = [] }) => {
             }}
           >
             <HighlightOffIcon
+              onClick={() => handleDeleteImage(item?.id)}
               sx={{
                 backgroundColor: "#fff",
                 borderRadius: "50%",
@@ -94,9 +103,18 @@ const Images = () => {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [loadingDetect, setLoadingDetect] = useState(false);
   const [uploadImage, { isLoading: upLoading }] = useUploadImageMutation();
+  const [deleteImage, { isLoading: deleteLoading }] = useDeleteImageMutation();
   const [submitImages, { isLoading: submitLoading }] =
     useSubmitImagesMutation();
-  const { data: images = [], isLoading, isError } = useGetImagesQuery();
+  const {
+    data: images = [
+      {
+        url: "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80",
+      },
+    ],
+    isLoading,
+    isError,
+  } = useGetImagesQuery();
 
   const location = useLocation();
   const initialFile = location.state?.file;
@@ -228,6 +246,18 @@ const Images = () => {
     e.target.value = "";
   };
 
+  const handleDeleteImage = async (id = 1) => {
+    try {
+      const res = await deleteImage({ id }).unwrap();
+      if (res?.data) {
+        toast.success("Image deleted successfully!");
+      }
+    } catch (err) {
+      toast.error("Image delete failed!");
+      console.error(err);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!images?.length) {
       toast.info("No images to submit.");
@@ -274,8 +304,8 @@ const Images = () => {
       justifyContent="center"
       overflow="hidden"
     >
-      <Stack py={4} width="85%" maxWidth={1080} alignItems="center">
-        <Stack spacing={3} alignItems="center">
+      <Stack py={3.5} width="85%" maxWidth={1080} alignItems="center">
+        <Stack spacing={1.5} alignItems="center">
           <Stack spacing={1} alignItems="center" textAlign="center">
             <Typography variant="h4" fontWeight={600}>
               {`Add your photos: (${images?.length}/30 uploaded)`}
@@ -330,7 +360,7 @@ const Images = () => {
 
         <Box
           sx={{
-            mt: 2,
+            mt: 1.5,
             p: 1,
             "&::-webkit-scrollbar": { width: "8px" },
             "&::-webkit-scrollbar-track": {
@@ -350,7 +380,11 @@ const Images = () => {
           }}
         >
           {images?.length > 0 ? (
-            <StandardImageList navigate={navigate} images={images} />
+            <StandardImageList
+              navigate={navigate}
+              images={images}
+              handleDeleteImage={handleDeleteImage}
+            />
           ) : (
             <Guide />
           )}

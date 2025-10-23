@@ -101,4 +101,30 @@ const USER_FORM_STYLE = {
   },
 };
 
-export { USER_FORM_STYLE };
+const DASHBOARD_LAYOUT_STYLE = {
+  mainWrapper: {
+    display: "flex",
+    minHeight: "100vh",
+    width: "100%",
+    overflow: "hidden",
+    alignItems: "center",
+    backgroundColor: "rgba(245, 246, 250, 1)",
+  },
+  pageWrapper: {
+    display: "flex",
+    flexGrow: 1,
+    flexDirection: "column",
+    zIndex: 1,
+    overflow: "hidden",
+    height: "95vh",
+    px: 1,
+  },
+  childrenStyle: () => ({
+    flexGrow: 1,
+    overflowY: "auto",
+    backgroundColor: "#fff",
+    p: 3,
+  }),
+};
+
+export { USER_FORM_STYLE, DASHBOARD_LAYOUT_STYLE };

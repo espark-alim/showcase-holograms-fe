@@ -12,7 +12,7 @@ export const imageApiSlice = apiSlice.injectEndpoints({
 
     getSingleImage: builder.query({
       query: ({ id }) => ({
-        url: `${SINGLE_IMAGE}/${id}`,
+        url: `${SINGLE_IMAGE}${id}`,
         method: "GET",
       }),
     }),
@@ -27,7 +27,7 @@ export const imageApiSlice = apiSlice.injectEndpoints({
 
     adjustImage: builder.mutation({
       query: ({ id, formData }) => ({
-        url: `${SINGLE_IMAGE}/${id}`,
+        url: `${SINGLE_IMAGE}${id}`,
         method: "POST",
         body: formData,
       }),
@@ -35,7 +35,7 @@ export const imageApiSlice = apiSlice.injectEndpoints({
 
     deleteImage: builder.mutation({
       query: ({ id }) => ({
-        url: `${SINGLE_IMAGE}/${id}`,
+        url: `${SINGLE_IMAGE}${id}`,
         method: "DELETE",
       }),
     }),

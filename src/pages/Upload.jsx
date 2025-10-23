@@ -14,9 +14,9 @@ import { useNavigate, useParams } from "react-router-dom";
 function createImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.addEventListener("load", () => resolve(img));
-    img.addEventListener("error", (error) => reject(error));
-    img.setAttribute("crossOrigin", "anonymous");
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = reject;
     img.src = url;
   });
 }
@@ -43,7 +43,7 @@ async function getCroppedImg(imageSrc, croppedAreaPixels) {
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {
-      resolve(URL.createObjectURL(blob));
+      resolve({ blob, url: URL.createObjectURL(blob) });
     }, "image/jpeg");
   });
 }
@@ -57,102 +57,74 @@ const Upload = () => {
   const { id } = useParams();
 
   const [uploadImage, { isLoading: upLoading }] = useUploadImageMutation();
-  const {
-    data: images = {},
-    isLoading,
-    isError,
-  } = useGetSingleImageQuery({
-    id: id,
-  });
+  const { data: imageData, isLoading } = useGetSingleImageQuery({ id });
 
-  console.log(id, "id");
+  const imageUrl = imageData?.url;
 
+  // Load face detection models once
   useEffect(() => {
     (async () => {
       try {
         const MODEL_URL = "/models";
         await Promise.all([
-          faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
           faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
           faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
         ]);
       } catch (err) {
         console.error("Failed to load face-api models", err);
-        toast.error("Face detection models failed to load");
+        toast.error("Failed to load face detection models");
       }
     })();
   }, []);
 
-  function createImage(url) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.addEventListener("load", () => resolve(img));
-      img.addEventListener("error", (error) => reject(error));
-      img.setAttribute("crossOrigin", "anonymous");
-      img.src = url;
-    });
-  }
-
-  const detectFacesInFile = useCallback(async (file) => {
-    const url = URL.createObjectURL(file);
-    try {
-      const img = await createImage(url);
-      const detections = await faceapi
-        .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks();
-
-      return {
-        facesCount: detections.length,
-        faceDetected: detections.length > 0,
-      };
-    } catch (err) {
-      console.error("Face detection failed for", file.name, err);
-      return { facesCount: 0, faceDetected: false, error: true };
-    } finally {
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
+  const detectFacesInBlob = useCallback(async (blob) => {
+    const img = await createImage(URL.createObjectURL(blob));
+    const detections = await faceapi.detectAllFaces(
+      img,
+      new faceapi.TinyFaceDetectorOptions()
+    );
+    return detections.length > 0;
   }, []);
 
-  const handleUploadImage = async (e) => {
-    const formData = new FormData();
-    formData.append("file", "croped image");
-
+  const handleCrop = useCallback(async () => {
     try {
+      if (!imageUrl) return;
+      const { blob, url } = await getCroppedImg(imageUrl, croppedAreaPixels);
+
+      // detect face in cropped result
+      const hasFace = await detectFacesInBlob(blob);
+
+      if (!hasFace) {
+        toast.info("No face detected in cropped image.");
+        return;
+      }
+
+      // Face found → send to API
+      const formData = new FormData();
+      formData.append("file", blob, "cropped.jpg");
+
       const res = await uploadImage(formData).unwrap();
       if (res?.data) {
-        toast.success("Image uploaded successfully!");
-        console.log("Uploaded:", res.data.filePath);
+        toast.success("Cropped image uploaded successfully!");
+        setCropping(false);
       } else {
-        toast.error("Image upload failed!");
+        toast.error("Upload failed!");
       }
     } catch (err) {
-      toast.error("Image upload failed!");
-      console.error(err);
+      console.error("Crop/Upload error:", err);
+      toast.error("Something went wrong during cropping/upload");
     }
-  };
+  }, [imageUrl, croppedAreaPixels, uploadImage, detectFacesInBlob]);
 
   const onCropComplete = useCallback((_, croppedPixels) => {
     setCroppedAreaPixels(croppedPixels);
   }, []);
 
-  const handleCrop = useCallback(async () => {
-    try {
-      const currentImg = "";
-      if (!currentImg) return;
-      const croppedUrl = await getCroppedImg(currentImg.url, croppedAreaPixels);
-
-      setCropping(false);
-    } catch (e) {
-      console.error(e);
-      toast.error(`Crop failed`);
-    }
-  }, [images, croppedAreaPixels]);
-
   return (
     <Box
       sx={{
         width: "100%",
-        height: "100vh",
+        minHeight: "100vh",
         display: "flex",
         alignItems: "center",
       }}
@@ -163,15 +135,15 @@ const Upload = () => {
         maxWidth="775px"
         alignItems="center"
         justifyContent="center"
-        height="100%"
-        maxHeight="1080px"
+        // height="100%"
+        // maxHeight="1080px"
         rowGap={3}
         py={2.5}
       >
         <Grid size={12} sx={{ display: "flex", justifyContent: "center" }}>
           <Toolbar
             onCrop={setCropping}
-            onSave={handleUploadImage}
+            onSave={handleCrop}
             onSaveLoading={upLoading}
             addImageLoading={isLoading}
           />
@@ -189,12 +161,15 @@ const Upload = () => {
                 position: "relative",
                 mx: "auto",
                 width: "95%",
-                height: 450,
+                height: 250,
                 overflow: "hidden",
               }}
             >
               <Cropper
-                image={images?.url}
+                image={
+                  imageUrl ||
+                  "https://www.shutterstock.com/image-photo/smiling-african-american-millennial-businessman-600nw-1437938108.jpg"
+                }
                 crop={crop}
                 zoom={zoom}
                 aspect={1}
@@ -211,10 +186,10 @@ const Upload = () => {
                 }}
               />
             </Box>
-          ) : images.length > 0 ? (
+          ) : imageUrl ? (
             <Box
               component="img"
-              src={images?.url}
+              src={imageUrl}
               sx={{
                 mx: "auto",
                 maxWidth: "90vw",
@@ -229,49 +204,45 @@ const Upload = () => {
           )}
         </Grid>
         <Grid sx={12}>
-          {!images.length > 0 && (
+          {cropping && (
             <Stack spacing={2} alignItems="center" my={3}>
-              {!cropping && (
-                <>
-                  <Slider
-                    value={zoom}
-                    min={1}
-                    max={3}
-                    step={0.1}
-                    onChange={(e, z) => setZoom(z)}
-                    sx={{ width: 200 }}
-                  />
-                  <Stack direction={"row"} spacing={1.5}>
-                    <Button
-                      variant="contained"
-                      onClick={handleCrop}
-                      sx={{
-                        borderRadius: "999px",
-                        textTransform: "none",
-                        boxShadow: "none",
-                        fontWeight: 600,
-                        px: 2.5,
-                      }}
-                    >
-                      Save Crop
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="accent"
-                      onClick={() => setCropping(false)}
-                      sx={{
-                        borderRadius: "999px",
-                        textTransform: "none",
-                        boxShadow: "none",
-                        fontWeight: 600,
-                        px: 2.5,
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </Stack>
-                </>
-              )}
+              <Slider
+                value={zoom}
+                min={1}
+                max={3}
+                step={0.1}
+                onChange={(e, z) => setZoom(z)}
+                sx={{ width: 200 }}
+              />
+              <Stack direction={"row"} spacing={1.5}>
+                <Button
+                  variant="contained"
+                  onClick={handleCrop}
+                  sx={{
+                    borderRadius: "999px",
+                    textTransform: "none",
+                    boxShadow: "none",
+                    fontWeight: 600,
+                    px: 2.5,
+                  }}
+                >
+                  Save Crop
+                </Button>
+                <Button
+                  variant="contained"
+                  color="accent"
+                  onClick={() => setCropping(false)}
+                  sx={{
+                    borderRadius: "999px",
+                    textTransform: "none",
+                    boxShadow: "none",
+                    fontWeight: 600,
+                    px: 2.5,
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Stack>
             </Stack>
           )}
           <Stack spacing={2} alignItems="center">

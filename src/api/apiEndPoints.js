@@ -2,7 +2,7 @@
 const IMAGES = "/users/original-photos";
 const UPLOAD_IMAGE = "/users/upload-original-photos";
 const SUBMIT_FORM = "/users/submit-form";
-const SINGLE_IMAGE = "/users/original-photo";
+const SINGLE_IMAGE = "/users/original-photo/";
 const SUBMIT_IMAGES = "/users/upload-processed-photos";
 
 // Reviewer Endpoints
