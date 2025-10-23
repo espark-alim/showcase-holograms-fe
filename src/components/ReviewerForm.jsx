@@ -17,7 +17,7 @@ import { useReviewerLoginMutation } from "../services/reviewer";
 
 const ReviewerForm = () => {
   const [reviewer, setReviewer] = useState({
-    email: "",
+    username: "",
     password: "",
   });
 
@@ -47,17 +47,21 @@ const ReviewerForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Create FormData object
+    const formData = new FormData();
+    Object.entries(reviewer).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
     try {
-      const response = await reviewerLogin(reviewer).unwrap();
-      console.log("User Data:", response);
+      const response = await reviewerLogin(formData).unwrap();
+      console.log("User Data:", response?.access_token);
       toast.success("Successfully Logged In");
-      localStorage.setItem("token", "xyz");
+      localStorage.setItem("token", response?.access_token);
       navigate("/dashboard");
     } catch (error) {
-      console.error("Error adding user:", error);
-      toast.error("Failed to login please try again");
-      localStorage.setItem("token", "xyz");
-      navigate("/dashboard");
+      console.error("Error logging in:", error);
+      toast.error("Failed to login, please try again");
     }
   };
 

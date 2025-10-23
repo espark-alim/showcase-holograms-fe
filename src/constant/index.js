@@ -52,7 +52,7 @@ const REVIEWER_FORM = {
   buttonText: "Login",
   fields: [
     {
-      name: "email",
+      name: "username",
       label: "Email",
       placeholder: "Enter Email",
       type: "email",

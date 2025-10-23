@@ -1,9 +1,9 @@
 import { Navigate, Outlet } from "react-router-dom";
 
 const ReviewerAccess = () => {
-  const isAccess = !!localStorage.getItem("accessToken");
+  const isAccess = !!localStorage.getItem("token");
 
-  return isAccess ? <Navigate to="/dashboard" replace /> : <Outlet />;
+  return isAccess ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ReviewerAccess;

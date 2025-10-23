@@ -4,10 +4,11 @@ import { apiSlice } from "../api/apiSlice";
 export const imageApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     submitImages: builder.mutation({
-      query: (formData) => ({
-        url: SUBMIT_IMAGES,
+      query: ({ id, body }) => ({
+        url: `${SUBMIT_IMAGES}${id}`,
         method: "POST",
-        body: formData,
+        body, // JSON
+        headers: { "Content-Type": "application/json" },
       }),
     }),
   }),

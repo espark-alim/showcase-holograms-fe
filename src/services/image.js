@@ -4,9 +4,13 @@ import { apiSlice } from "../api/apiSlice";
 export const imageApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getImages: builder.query({
-      query: () => ({
-        url: IMAGES,
+      query: ({ id }) => ({
+        url: `${IMAGES}${id}`,
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
       }),
     }),
 
@@ -14,12 +18,16 @@ export const imageApiSlice = apiSlice.injectEndpoints({
       query: ({ id }) => ({
         url: `${SINGLE_IMAGE}${id}`,
         method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
       }),
     }),
 
     uploadImage: builder.mutation({
-      query: (formData) => ({
-        url: UPLOAD_IMAGE,
+      query: ({ id, formData }) => ({
+        url: `${UPLOAD_IMAGE}${id}`,
         method: "POST",
         body: formData,
       }),

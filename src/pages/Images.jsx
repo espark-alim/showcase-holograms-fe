@@ -57,7 +57,7 @@ const StandardImageList = ({
           }}
         >
           <Box
-            onClick={() => navigate(`/uploads/${item?.id}`)}
+            onClick={() => navigate(`/uploads/${item?.photo_id}`)}
             component="img"
             sx={{
               width: "243px",
@@ -66,8 +66,8 @@ const StandardImageList = ({
               objectFit: "contain",
               objectPosition: "center",
             }}
-            src={item?.url}
-            alt={`${item?.id}`}
+            src={item?.photo_url}
+            alt={`${item?.photo_id}`}
             loading="lazy"
           />
           <Stack
@@ -102,19 +102,39 @@ const StandardImageList = ({
 const Images = () => {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [loadingDetect, setLoadingDetect] = useState(false);
+  const id = localStorage.getItem("accessToken");
+
   const [uploadImage, { isLoading: upLoading }] = useUploadImageMutation();
   const [deleteImage, { isLoading: deleteLoading }] = useDeleteImageMutation();
   const [submitImages, { isLoading: submitLoading }] =
     useSubmitImagesMutation();
   const {
-    data: images = [
-      {
-        url: "https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80",
-      },
-    ],
+    data: images = [],
     isLoading,
     isError,
-  } = useGetImagesQuery();
+  } = useGetImagesQuery({
+    id: 5,
+  });
+
+  const fetchData = async () => {
+    try {
+      const res = await fetch(
+        "https://d3ad1855105c.ngrok-free.app/api/v1/users/original-photos/5",
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await res.json(); // parse JSON
+      console.log(data, "images");
+    } catch (err) {
+      console.error("Failed to fetch JSON:", err);
+    }
+  };
 
   const location = useLocation();
   const initialFile = location.state?.file;
@@ -220,22 +240,16 @@ const Images = () => {
 
     for (const item of valid) {
       if (!item.file || !(item.file instanceof File)) {
-        console.error("Invalid file:", item.file);
         toast.error("Invalid file!");
         continue;
       }
-
       const formData = new FormData();
-      formData.append("file", item.file);
+      formData.append("files", item.file);
 
       try {
-        const res = await uploadImage(formData).unwrap();
-        if (res?.data) {
-          item.uploadedUrl = res.data.filePath;
+        const res = await uploadImage({ id, formData }).unwrap();
+        if (res.success) {
           toast.success("Image uploaded successfully!");
-          console.log("Uploaded:", res.data.filePath);
-        } else {
-          toast.error("Image upload failed!");
         }
       } catch (err) {
         toast.error("Image upload failed!");
@@ -259,34 +273,38 @@ const Images = () => {
   };
 
   const handleSubmit = async () => {
-    if (!images?.length) {
-      toast.info("No images to submit.");
-      return;
-    }
+    // if (!images?.length) {
+    //   toast.info("No images to submit.");
+    //   return;
+    // }
 
-    const allValid = images.every((i) => i.faceDetected === true);
-    if (!allValid) {
-      toast.info("Some images have no detected faces.");
-      return;
-    }
+    // const allValid = images.every((i) => i.faceDetected === true);
+    // if (!allValid) {
+    //   toast.info("Some images have no detected faces.");
+    //   return;
+    // }
 
     try {
-      const imagePayload = images.map((img) => ({
-        name: img.file?.name || "unknown",
-        uploadedUrl: img.uploadedUrl || "",
-        facesCount: img.facesCount,
-      }));
+      // Just extract the IDs from your images array
+      const photo_ids = images.map((img) => img.photo_id);
 
-      const res = await submitImages(imagePayload).unwrap();
+      // Optional check: ensure at least one image
+      if (!photo_ids.length) {
+        toast.info("No images to submit.");
+        return;
+      }
 
-      if (res?.data) {
+      // Create raw JSON payload
+      const payload = { photo_ids };
+
+      const res = await submitImages({ id, body: payload }).unwrap();
+
+      if (res) {
         toast.success(`Thank you! Your photos are submitted`);
         setTimeout(() => {
           toast.info(`We’ll email you when your holograms are ready`);
         }, 5000);
         console.log("Server Response:", res.data);
-      } else {
-        toast.error("Image submission failed!");
       }
     } catch (err) {
       console.error("Submit failed:", err);

@@ -44,15 +44,14 @@ const UserForm = () => {
 
     try {
       const response = await addUser(objToSend).unwrap();
-      console.log("User Data:", response);
+      const { data } = response;
+      console.log("User Data:", data);
       toast.success("User registered successfully!");
-      localStorage.setItem("accessToken", "xyz");
+      localStorage.setItem("accessToken", `${data?.user_id}`);
       navigate("/uploads");
     } catch (error) {
       console.error("Error adding user:", error);
       toast.error("Failed to register user. Please try again.");
-      localStorage.setItem("accessToken", "xyz");
-      navigate("/uploads");
     }
   };
 

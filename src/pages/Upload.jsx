@@ -59,7 +59,7 @@ const Upload = () => {
   const [uploadImage, { isLoading: upLoading }] = useUploadImageMutation();
   const { data: imageData, isLoading } = useGetSingleImageQuery({ id });
 
-  const imageUrl = imageData?.url;
+  const imageUrl = imageData?.photo_url;
 
   // Load face detection models once
   useEffect(() => {
@@ -166,10 +166,7 @@ const Upload = () => {
               }}
             >
               <Cropper
-                image={
-                  imageUrl ||
-                  "https://www.shutterstock.com/image-photo/smiling-african-american-millennial-businessman-600nw-1437938108.jpg"
-                }
+                image={imageUrl}
                 crop={crop}
                 zoom={zoom}
                 aspect={1}
