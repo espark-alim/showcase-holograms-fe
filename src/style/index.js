@@ -108,7 +108,7 @@ const DASHBOARD_LAYOUT_STYLE = {
     width: "100%",
     overflow: "hidden",
     alignItems: "center",
-    backgroundColor: "rgba(245, 246, 250, 1)",
+    // backgroundColor: "rgba(245, 246, 250, 1)",
   },
   pageWrapper: {
     display: "flex",

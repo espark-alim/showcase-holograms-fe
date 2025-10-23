@@ -11,7 +11,7 @@ import {
   useUploadImageMutation,
 } from "../services/image";
 import { useSubmitImagesMutation } from "../services/processImage";
-
+ 
 const StandardImageList = ({
   navigate,
   images = [],
@@ -82,7 +82,7 @@ const StandardImageList = ({
             }}
           >
             <HighlightOffIcon
-              onClick={() => handleDeleteImage(item?.id)}
+              onClick={() => handleDeleteImage(item?.photo_id)}
               sx={{
                 backgroundColor: "#fff",
                 borderRadius: "50%",
@@ -98,50 +98,28 @@ const StandardImageList = ({
     </Box>
   );
 };
-
+ 
 const Images = () => {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [loadingDetect, setLoadingDetect] = useState(false);
   const id = localStorage.getItem("accessToken");
-
+ 
   const [uploadImage, { isLoading: upLoading }] = useUploadImageMutation();
   const [deleteImage, { isLoading: deleteLoading }] = useDeleteImageMutation();
   const [submitImages, { isLoading: submitLoading }] =
     useSubmitImagesMutation();
-  const {
-    data: images = [],
-    isLoading,
-    isError,
-  } = useGetImagesQuery({
-    id: 5,
+  const { data, isLoading, isError } = useGetImagesQuery({
+    id: id,
   });
-
-  const fetchData = async () => {
-    try {
-      const res = await fetch(
-        "https://d3ad1855105c.ngrok-free.app/api/v1/users/original-photos/5",
-        {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const data = await res.json(); // parse JSON
-      console.log(data, "images");
-    } catch (err) {
-      console.error("Failed to fetch JSON:", err);
-    }
-  };
-
+ 
+  const images = data?.data;
+ 
   const location = useLocation();
   const initialFile = location.state?.file;
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const MAX_IMAGES = 30;
-
+ 
   useEffect(() => {
     if (initialFile) {
       const url = URL.createObjectURL(initialFile);
@@ -154,7 +132,7 @@ const Images = () => {
       console.log("Initial file added:", imgObj);
     }
   }, [initialFile]);
-
+ 
   useEffect(() => {
     (async () => {
       try {
@@ -171,7 +149,7 @@ const Images = () => {
       }
     })();
   }, []);
-
+ 
   function createImage(url) {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -181,7 +159,7 @@ const Images = () => {
       img.src = url;
     });
   }
-
+ 
   const detectFacesInFile = useCallback(async (file) => {
     const url = URL.createObjectURL(file);
     try {
@@ -189,7 +167,7 @@ const Images = () => {
       const detections = await faceapi
         .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks();
-
+ 
       return {
         facesCount: detections.length,
         faceDetected: detections.length > 0,
@@ -201,23 +179,23 @@ const Images = () => {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
   }, []);
-
+ 
   const handleUploadImage = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-
-    if (images.length + files.length > MAX_IMAGES) {
+ 
+    if (images?.length + files?.length > MAX_IMAGES) {
       toast.info(`You can only upload up to ${MAX_IMAGES} images.`);
       e.target.value = "";
       return;
     }
-
+ 
     if (!modelsLoaded) {
       toast.info(`Face detection models are still loading. Please wait.`);
       e.target.value = "";
       return;
     }
-
+ 
     setLoadingDetect(true);
     const results = await Promise.all(
       files.map(async (file) => {
@@ -230,14 +208,14 @@ const Images = () => {
       })
     );
     setLoadingDetect(false);
-
+ 
     const valid = results.filter((r) => r.faceDetected);
     const invalid = results.filter((r) => !r.faceDetected);
-
+ 
     if (invalid.length > 0) {
       toast.info(`${invalid.length} image(s) skipped (no face detected).`);
     }
-
+ 
     for (const item of valid) {
       if (!item.file || !(item.file instanceof File)) {
         toast.error("Invalid file!");
@@ -245,7 +223,7 @@ const Images = () => {
       }
       const formData = new FormData();
       formData.append("files", item.file);
-
+ 
       try {
         const res = await uploadImage({ id, formData }).unwrap();
         if (res.success) {
@@ -256,11 +234,11 @@ const Images = () => {
         console.error(err);
       }
     }
-
+ 
     e.target.value = "";
   };
-
-  const handleDeleteImage = async (id = 1) => {
+ 
+  const handleDeleteImage = async (id) => {
     try {
       const res = await deleteImage({ id }).unwrap();
       if (res?.data) {
@@ -271,34 +249,34 @@ const Images = () => {
       console.error(err);
     }
   };
-
+ 
   const handleSubmit = async () => {
     // if (!images?.length) {
     //   toast.info("No images to submit.");
     //   return;
     // }
-
+ 
     // const allValid = images.every((i) => i.faceDetected === true);
     // if (!allValid) {
     //   toast.info("Some images have no detected faces.");
     //   return;
     // }
-
+ 
     try {
       // Just extract the IDs from your images array
       const photo_ids = images.map((img) => img.photo_id);
-
+ 
       // Optional check: ensure at least one image
       if (!photo_ids.length) {
         toast.info("No images to submit.");
         return;
       }
-
+ 
       // Create raw JSON payload
       const payload = { photo_ids };
-
+ 
       const res = await submitImages({ id, body: payload }).unwrap();
-
+ 
       if (res) {
         toast.success(`Thank you! Your photos are submitted`);
         setTimeout(() => {
@@ -311,10 +289,10 @@ const Images = () => {
       toast.error("Image submission failed!");
     }
   };
-
+ 
   // if (isLoading) return <Typography>Loading images...</Typography>;
   // if (isError) return <Typography>Error loading images</Typography>;
-
+ 
   return (
     <Stack
       minHeight="100vh"
@@ -332,7 +310,7 @@ const Images = () => {
               Only upload clear, focused face photos.
             </Typography>
           </Stack>
-
+ 
           <Stack direction="row" justifyContent="center" spacing={1.5}>
             <Button
               variant="contained"
@@ -375,7 +353,7 @@ const Images = () => {
             </Button>
           </Stack>
         </Stack>
-
+ 
         <Box
           sx={{
             mt: 1.5,
@@ -411,5 +389,5 @@ const Images = () => {
     </Stack>
   );
 };
-
+ 
 export default Images;

@@ -57,8 +57,8 @@ const Upload = () => {
   const { id } = useParams();
 
   const [uploadImage, { isLoading: upLoading }] = useUploadImageMutation();
-  const { data: imageData, isLoading } = useGetSingleImageQuery({ id });
-
+  const { data, isLoading } = useGetSingleImageQuery({ id });
+  const imageData = data?.data;
   const imageUrl = imageData?.photo_url;
 
   // Load face detection models once

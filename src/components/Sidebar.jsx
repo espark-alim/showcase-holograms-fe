@@ -36,7 +36,8 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose }) => {
               boxSizing: "border-box",
               ...scrollbarStyles,
               border: "0",
-              backgroundColor: "rgba(245, 246, 250, 1)",
+              boxShadow: "hsla(220, 50%, 10%, 0.09)  0px 15px 35px -5px",
+              backgroundColor: "transparent",
             },
           }}
         >

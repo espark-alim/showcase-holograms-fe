@@ -9,7 +9,7 @@ const PATHS = {
 
   // ------ reviewer ----------
   dashboard: "/dashboard",
-  users: "/users",
+  users: "/dashboard/users",
   userDetail: "/user/:mode",
   setting: "/setting",
 };
