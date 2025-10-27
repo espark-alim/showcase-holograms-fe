@@ -19,9 +19,9 @@ const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
       toast.error("Internal server error. Please try again later.");
     }
 
-    if (status === 404) {
-      toast.error("Resource not found.");
-    }
+    // if (status === 404) {
+    //   toast.error("Resource not found.");
+    // }
   }
 
   return result;
@@ -30,5 +30,6 @@ const baseQueryWithErrorHandling = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "api", // optional, default bhi chalega
   baseQuery: baseQueryWithErrorHandling,
+  tagTypes: ["Images", "SingleImage"],
   endpoints: () => ({}),
 });

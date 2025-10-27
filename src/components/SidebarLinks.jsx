@@ -169,32 +169,36 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  useTheme,
 } from "@mui/material";
-import HomeIcon from "@mui/icons-material/Home";
-import FolderIcon from "@mui/icons-material/Folder";
-import MessageIcon from "@mui/icons-material/Message";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import BarChartIcon from "@mui/icons-material/BarChart";
+import { NavLink, useLocation } from "react-router-dom";
 
+// Icons
+import FolderIcon from "@mui/icons-material/Folder";
+
+// Sidebar Menu Items
 const menuItems = [
-  { icon: <FolderIcon />, label: "Users" },
+  { icon: <FolderIcon />, label: "Users", path: "/dashboard" },
 ];
 
 const Sidebar = () => {
+  const location = useLocation();
+  const theme = useTheme();
+
   return (
     <Box
       sx={{
         width: 240,
-        color: "black",
         height: "100vh",
-        py: 3,
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
+        py: 3,
+        color: theme.palette.text.primary,
         backgroundColor: "transparent",
       }}
     >
+      {/* --- Profile Section --- */}
       <Box>
         <Box sx={{ textAlign: "center", mb: 3 }}>
           <Avatar
@@ -203,50 +207,67 @@ const Sidebar = () => {
               height: 75,
               mx: "auto",
               mb: 1,
-              bgcolor: "primary.main",
+              bgcolor: theme.palette.primary.main,
             }}
           />
           <Typography variant="subtitle1" fontWeight={600}>
             JOHN DON
           </Typography>
-          <Typography variant="body2" sx={{ color: "gray.300" }}>
+          <Typography variant="body2" color="text.secondary">
             johndon@company.com
           </Typography>
         </Box>
 
-        <List>
-          {menuItems.map((item) => (
-            <ListItemButton
-              key={item.label}
-              sx={{
-                borderRadius: 2,
-                m: 1,
-                px: 2,
-                "&:hover ListItemIcon": {
-                  color: "white",
-                },
-              }}
-            >
-              <ListItemIcon
+        {/* --- Navigation List --- */}
+        <List disablePadding>
+          {menuItems.map(({ icon, label, path }) => {
+            const isActive = location.pathname.startsWith(path);
+
+            return (
+              <ListItemButton
+                key={label}
+                component={NavLink}
+                to={path}
+                disableRipple
                 sx={{
-                  color: "primary.main",
-                  minWidth: 36,
-                  "&:hover": { color: "white" },
+                  borderRadius: 2,
+                  my: 1,
+                  mx: 2,
+                  px: 2,
+                  color: "black",
+                  boxShadow: "hsla(220, 50%, 10%, 0.09)  0px 15px 35px -5px",
+                  transition: "all 0.3s ease",
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          ))}
+                <ListItemIcon
+                  sx={{
+                    minWidth: 36,
+                    color: theme.palette.primary.light,
+                    transition: "color 0.3s ease",
+                  }}
+                >
+                  {icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={label}
+                  primaryTypographyProps={{
+                    fontWeight: isActive ? 500 : 400,
+                    letterSpacing: 1,
+                  }}
+                />
+              </ListItemButton>
+            );
+          })}
         </List>
       </Box>
+
+      {/* --- Footer --- */}
       <Typography
         variant="caption"
         textAlign="center"
         sx={{ opacity: 0.7, mt: 2 }}
       >
-        © 2025 Company
+        © {new Date().getFullYear()} Company
       </Typography>
     </Box>
   );

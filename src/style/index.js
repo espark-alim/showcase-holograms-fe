@@ -116,14 +116,15 @@ const DASHBOARD_LAYOUT_STYLE = {
     flexDirection: "column",
     zIndex: 1,
     overflow: "hidden",
-    height: "95vh",
-    px: 1,
+    height: "100vh",
   },
   childrenStyle: () => ({
     flexGrow: 1,
-    overflowY: "auto",
+    overflowY: "hidden",
+    overflowX: "hidden",
     backgroundColor: "#fff",
-    p: 3,
+    px: 3,
+    py: 5,
   }),
 };
 

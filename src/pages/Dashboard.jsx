@@ -1,31 +1,39 @@
 import { Box, Grid, Typography, Card } from "@mui/material";
 
 import DynamicTable from "../components/DynamicTable";
+import { useUpdatePhotoStatusMutation } from "../services/reviewer";
 
 const DashboardPage = () => {
-  const tableData = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@company.com",
-      phone: "+123456789",
-      status: "Approved",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@company.com",
-      phone: "+123456789",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      name: "Sam Wilson",
-      email: "sam@company.com",
-      phone: "+123456789",
-      status: "Pending",
-    },
-  ];
+  const {
+    data: users = [
+      {
+        id: 1,
+        name: "John Doe",
+        email: "john@company.com",
+        phone: "+123456789",
+        status: "Approved",
+      },
+      {
+        id: 2,
+        name: "Alex Doe",
+        email: "alex@company.com",
+        phone: "+123456789",
+        status: "Approved",
+      },
+    ],
+    isLoading: isUsersLoading,
+  } = {};
+
+  const [updatePhotoStatus, { isLoading: isUpdating }] =
+    useUpdatePhotoStatusMutation();
+
+  const tableData = users?.map((u) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    phone: u.phone,
+    status: u.status,
+  }));
 
   const tableColumns = [
     { id: "name", label: "Name" },
@@ -34,17 +42,32 @@ const DashboardPage = () => {
     { id: "status", label: "Status" },
   ];
 
-  const COLORS = ["#0088FE", "#FFBB28"];
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await updatePhotoStatus({
+        id,
+        data: { status: newStatus.toLowerCase() },
+      }).unwrap();
+
+      console.log(`✅ Status of user ${id} updated to ${newStatus}`);
+    } catch (err) {
+      console.error("❌ Failed to update:", err);
+    }
+  };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       <Typography variant="h5" fontWeight={600} mb={3}>
         Users
       </Typography>
 
       {/* Dynamic Table */}
-      <Box mt={3}>
-        <DynamicTable rows={tableData} columns={tableColumns} />
+      <Box my={3}>
+        <DynamicTable
+          rows={tableData}
+          columns={tableColumns}
+          onStatusChange={handleStatusChange}
+        />
       </Box>
     </Box>
   );

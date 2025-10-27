@@ -1,4 +1,9 @@
-import { IMAGES, SINGLE_IMAGE, UPLOAD_IMAGE } from "../api/apiEndPoints";
+import {
+  IMAGES,
+  SINGLE_IMAGE,
+  UPLOAD_IMAGE,
+  SUBMIT_IMAGES,
+} from "../api/apiEndPoints";
 import { apiSlice } from "../api/apiSlice";
 
 export const imageApiSlice = apiSlice.injectEndpoints({
@@ -12,6 +17,7 @@ export const imageApiSlice = apiSlice.injectEndpoints({
           Accept: "application/json",
         },
       }),
+      providesTags: (result, error, { id }) => [{ type: "Images", id }],
     }),
 
     getSingleImage: builder.query({
@@ -23,6 +29,7 @@ export const imageApiSlice = apiSlice.injectEndpoints({
           "Content-Type": "application/json",
         },
       }),
+      providesTags: (result, error, { id }) => [{ type: "SingleImage", id }],
     }),
 
     uploadImage: builder.mutation({
@@ -31,14 +38,19 @@ export const imageApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: formData,
       }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Images", id }],
     }),
 
     adjustImage: builder.mutation({
       query: ({ id, formData }) => ({
         url: `${SINGLE_IMAGE}${id}`,
-        method: "POST",
+        method: "PUT",
         body: formData,
       }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "SingleImage", id },
+        { type: "Images", id },
+      ],
     }),
 
     deleteImage: builder.mutation({
@@ -46,6 +58,7 @@ export const imageApiSlice = apiSlice.injectEndpoints({
         url: `${SINGLE_IMAGE}${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Images", id }],
     }),
   }),
 });

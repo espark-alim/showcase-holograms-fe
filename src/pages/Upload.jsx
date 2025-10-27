@@ -6,6 +6,7 @@ import Toolbar from "../components/Toolbar";
 import Guide from "../components/Guide";
 import { toast } from "react-toastify";
 import {
+  useAdjustImageMutation,
   useGetSingleImageQuery,
   useUploadImageMutation,
 } from "../services/image";
@@ -55,11 +56,11 @@ const Upload = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const navigate = useNavigate();
   const { id } = useParams();
-
-  const [uploadImage, { isLoading: upLoading }] = useUploadImageMutation();
+  const [croppedImageUrl, setCroppedImageUrl] = useState(null);
+  const [adjustImage, { isLoading: upLoading }] = useAdjustImageMutation();
   const { data, isLoading } = useGetSingleImageQuery({ id });
   const imageData = data?.data;
-  const imageUrl = imageData?.photo_url;
+  const imageUrl = `https://images.ctfassets.net/h6goo9gw1hh6/2sNZtFAWOdP1lmQ33VwRN3/24e953b920a9cd0ff2e1d587742a2472/1-intro-photo-final.jpg?w=1200&h=992&fl=progressive&q=70&fm=jpg`;
 
   // Load face detection models once
   useEffect(() => {
@@ -89,32 +90,88 @@ const Upload = () => {
   const handleCrop = useCallback(async () => {
     try {
       if (!imageUrl) return;
+
+      // crop result
       const { blob, url } = await getCroppedImg(imageUrl, croppedAreaPixels);
 
       // detect face in cropped result
       const hasFace = await detectFacesInBlob(blob);
-
       if (!hasFace) {
         toast.info("No face detected in cropped image.");
         return;
       }
 
-      // Face found → send to API
-      const formData = new FormData();
-      formData.append("file", blob, "cropped.jpg");
+      // ✅ show cropped image instantly
+      setCroppedImageUrl(url);
+      setCropping(false);
 
-      const res = await uploadImage(formData).unwrap();
-      if (res?.data) {
-        toast.success("Cropped image uploaded successfully!");
-        setCropping(false);
-      } else {
-        toast.error("Upload failed!");
-      }
+      // return cropped blob + url to use later
+      return { blob, url };
     } catch (err) {
-      console.error("Crop/Upload error:", err);
-      toast.error("Something went wrong during cropping/upload");
+      console.error("Crop error:", err);
+      toast.error("Something went wrong while cropping");
     }
-  }, [imageUrl, croppedAreaPixels, uploadImage, detectFacesInBlob]);
+  }, [imageUrl, croppedAreaPixels, detectFacesInBlob]);
+
+  // ✅ 2️⃣ Save only (API upload)
+  const handleSave = useCallback(
+    async (blob, url) => {
+      try {
+        if (!blob) {
+          toast.error("No cropped image found.");
+          return;
+        }
+
+        // blob → file convert
+        const blobToFile = async (blob, url) => {
+          const fileName = url?.split("/").pop() || "file.jpg";
+          const extension = blob.type.split("/")[1] || "jpeg";
+          const finalName = `${fileName}.${extension}`;
+          return new File([blob], finalName, { type: blob.type });
+        };
+
+        // async function urlToFile(url, fileName = "image.jpg") {
+        //   try {
+        //     const response = await fetch(url);
+        //     const blob = await response.blob();
+        //     const file = new File([blob], fileName, { type: blob.type });
+        //     return file;
+        //   } catch (error) {
+        //     console.error("Error converting URL to File:", error);
+        //     throw error;
+        //   }
+        // }
+        const file = await blobToFile(blob, url);
+
+        // send to API
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await adjustImage({ id, formData }).unwrap();
+
+        if (res?.data) {
+          toast.success("Cropped image uploaded successfully!");
+          setCropping(false);
+          setTimeout(() => {
+            navigate("/uploads");
+          }, 3000);
+        } else {
+          toast.error("Upload failed!");
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+        toast.error("Something went wrong during upload");
+      }
+    },
+    [adjustImage, id, setCropping]
+  );
+
+  const onCropAndSave = async () => {
+    const result = await handleCrop();
+    if (result) {
+      await handleSave(result.blob, result.url);
+    }
+  };
 
   const onCropComplete = useCallback((_, croppedPixels) => {
     setCroppedAreaPixels(croppedPixels);
@@ -143,7 +200,7 @@ const Upload = () => {
         <Grid size={12} sx={{ display: "flex", justifyContent: "center" }}>
           <Toolbar
             onCrop={setCropping}
-            onSave={handleCrop}
+            onSave={onCropAndSave}
             onSaveLoading={upLoading}
             addImageLoading={isLoading}
           />
@@ -156,6 +213,7 @@ const Upload = () => {
           sx={{ display: "flex", justifyContent: "center" }}
         >
           {cropping ? (
+            // Cropper view
             <Box
               sx={{
                 position: "relative",
@@ -166,7 +224,7 @@ const Upload = () => {
               }}
             >
               <Cropper
-                image={imageUrl}
+                image={croppedImageUrl || imageUrl} // 👈 show cropped if available
                 crop={crop}
                 zoom={zoom}
                 aspect={1}
@@ -183,6 +241,19 @@ const Upload = () => {
                 }}
               />
             </Box>
+          ) : croppedImageUrl ? ( // 👈 show cropped preview if exists
+            <Box
+              component="img"
+              src={croppedImageUrl}
+              sx={{
+                mx: "auto",
+                maxWidth: "90vw",
+                minHeight: "380px",
+                maxHeight: "60vh",
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
           ) : imageUrl ? (
             <Box
               component="img"
@@ -223,7 +294,7 @@ const Upload = () => {
                     px: 2.5,
                   }}
                 >
-                  Save Crop
+                  Save
                 </Button>
                 <Button
                   variant="contained"

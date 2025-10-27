@@ -1,10 +1,10 @@
-import { Box } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import { DASHBOARD_LAYOUT_STYLE } from "../style";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import SidebarLayout from "./Sidebar";
 import { Outlet } from "react-router-dom";
-import Navbar from "./Navbar";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const Layout = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -21,13 +21,28 @@ const Layout = () => {
         isMobileSidebarOpen={isMobileSidebarOpen}
         onSidebarClose={() => setMobileSidebarOpen(false)}
       />
+      <IconButton
+        onClick={() => setMobileSidebarOpen((prev) => !prev)}
+        sx={{
+          display: { xs: "flex", md: "none" },
+          position: "absolute",
+          top: 16,
+          right: 16,
+          zIndex: 1300,
+          backgroundColor: "white",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+          "&:hover": {
+            backgroundColor: "primary.main",
+            color: "#fff",
+          },
+        }}
+      >
+        <MenuIcon />
+      </IconButton>
       {/* ------------------------------------------- */}
       {/* Main Wrapper */}
       {/* ------------------------------------------- */}
       <Box sx={pageWrapper}>
-        {/* ------------------------------------------- */}
-        {/* Header */}
-        {/* <Navbar openMobileSidebar={setMobileSidebarOpen} /> */}
         {/* ------------------------------------------- */}
         {/* Page Route */}
         {/* ------------------------------------------- */}

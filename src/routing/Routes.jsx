@@ -8,23 +8,10 @@ import Images from "../pages/Images";
 import Login from "../pages/Login";
 import ReviewerAccess from "./ReviewerAccess";
 import Dashboard from "../pages/Dashboard";
-import Detailed from "../components/Detailed";
 import Layout from "../components/Layout";
-import Users from "../pages/Users";
-import Setting from "../pages/Setting";
 
 const AppRoutes = () => {
-  const {
-    home,
-    uploads,
-    uploadImage,
-    notFound,
-    login,
-    dashboard,
-    users,
-    userDetail,
-    setting,
-  } = PATHS;
+  const { home, uploads, uploadImage, notFound, login, dashboard } = PATHS;
 
   return (
     <Routes>
@@ -38,9 +25,6 @@ const AppRoutes = () => {
       <Route element={<ReviewerAccess />}>
         <Route element={<Layout />}>
           <Route path={dashboard} element={<Dashboard />} />
-          <Route path={users} element={<Users />} />
-          <Route path={userDetail} element={<Detailed />} />
-          <Route path={setting} element={<Setting />} />
         </Route>
       </Route>
     </Routes>
