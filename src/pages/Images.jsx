@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  LinearProgress,
   Stack,
   Typography,
 } from "@mui/material";
@@ -16,86 +15,31 @@ import { useDeleteImageMutation, useGetImagesQuery } from "../services/image";
 import { useSubmitImagesMutation } from "../services/processImage";
 import { useDispatch } from "react-redux";
 import { apiSlice } from "../api/apiSlice";
+import { IMAGES_STYLE } from "../style";
 
 const StandardImageList = ({
   navigate,
   images = [],
   handleDeleteImage = () => {},
 }) => {
+  const { imageListContainer, imageBox, image, deleteIconStack, deleteIcon } =
+    IMAGES_STYLE || {};
   return (
-    <Box
-      sx={{
-        px: 1.5,
-        py: 1.5,
-        rowGap: 0.5,
-        columnGap: 1.2,
-        display: "grid",
-        maxWidth: "1080px",
-        justifyContent: "center",
-        gridTemplateColumns: {
-          xs: `repeat(1, ${images.length < 5 ? "auto" : "1fr"})`,
-          sm: `repeat(${Math.min(images.length, 2)}, ${
-            images.length < 5 ? "auto" : "1fr"
-          })`,
-          md: `repeat(${Math.min(images.length, 3)}, ${
-            images.length < 5 ? "auto" : "1fr"
-          })`,
-          lg: `repeat(${Math.min(images.length, 4)}, ${
-            images.length < 5 ? "auto" : "1fr"
-          })`,
-          xl: `repeat(${Math.min(images.length, 5)}, ${
-            images.length < 5 ? "auto" : "1fr"
-          })`,
-        },
-      }}
-    >
+    <Box sx={imageListContainer(images?.length)}>
       {images?.map((item, index) => (
-        <Box
-          key={index}
-          sx={{
-            position: "relative",
-            transition: "transform 0.3s ease",
-            "&:hover": {
-              transform: "scale(1.08)",
-              boxShadow: "0 6px 12px rgba(12, 197, 219, 0.4)",
-            },
-          }}
-        >
+        <Box key={index} sx={imageBox}>
           <Box
             onClick={() => navigate(`/uploads/${item?.photo_id}`)}
             component="img"
-            sx={{
-              width: "243px",
-              height: "228px",
-              cursor: "pointer",
-              objectFit: "contain",
-              objectPosition: "center",
-            }}
+            sx={image}
             src={item?.photo_url}
             alt={`${item?.photo_id}`}
             loading="lazy"
           />
-          <Stack
-            direction={"row"}
-            spacing={1}
-            sx={{
-              position: "absolute",
-              zIndex: 1,
-              top: -2.5,
-              right: -2.5,
-              cursor: "pointer",
-            }}
-          >
+          <Stack direction={"row"} spacing={1} sx={deleteIconStack}>
             <HighlightOffIcon
               onClick={() => handleDeleteImage(item?.photo_id)}
-              sx={{
-                backgroundColor: "#fff",
-                borderRadius: "50%",
-                color: "primary.main",
-                "&:hover": {
-                  color: "red",
-                },
-              }}
+              sx={deleteIcon}
             />
           </Stack>
         </Box>
@@ -105,13 +49,15 @@ const StandardImageList = ({
 };
 
 const Images = () => {
+  const { container, innerStack, uploadButton, submitButton, scrollBox } =
+    IMAGES_STYLE || {};
   const id = localStorage.getItem("accessToken");
   const [modelsLoaded, setModelsLoaded] = useState(false);
-  const [deleteImage, { isLoading: deleteLoading }] = useDeleteImageMutation();
+  const [deleteImage] = useDeleteImageMutation();
   const [submitImages, { isLoading: submitLoading }] =
     useSubmitImagesMutation();
 
-  const { data, isLoading, isError } = useGetImagesQuery({
+  const { data, isLoading } = useGetImagesQuery({
     id: id,
   });
 
@@ -214,13 +160,8 @@ const Images = () => {
   };
 
   return (
-    <Stack
-      minHeight="100vh"
-      alignItems="center"
-      justifyContent="center"
-      overflow="hidden"
-    >
-      <Stack py={3.5} width="85%" maxWidth={1080} alignItems="center">
+    <Stack sx={container}>
+      <Stack sx={innerStack}>
         <Stack spacing={1.5} alignItems="center">
           <Stack spacing={1} alignItems="center" textAlign="center">
             <Typography variant="h4" fontWeight={600}>
@@ -240,14 +181,7 @@ const Images = () => {
               variant="contained"
               color="accent"
               onClick={handleClick}
-              sx={{
-                borderRadius: "999px",
-                textTransform: "none",
-                boxShadow: "none",
-                fontWeight: 600,
-                fontSize: { xs: "12px", md: "16px" },
-                px: { xs: 1.5, sm: 2.5 },
-              }}
+              sx={uploadButton}
             >
               Upload Photos
             </Button>
@@ -262,41 +196,14 @@ const Images = () => {
               variant="contained"
               onClick={handleSubmit}
               loading={submitLoading}
-              sx={{
-                borderRadius: "999px",
-                textTransform: "none",
-                boxShadow: "none",
-                fontWeight: 600,
-                fontSize: { xs: "12px", md: "16px" },
-                px: { xs: 1.5, sm: 2.5 },
-              }}
+              sx={submitButton}
             >
               Submit Photos
             </Button>
           </Stack>
         </Stack>
 
-        <Box
-          sx={{
-            mt: 1.5,
-            p: 1,
-            "&::-webkit-scrollbar": { width: "8px" },
-            "&::-webkit-scrollbar-track": {
-              backgroundColor: "#f1f1f1",
-              borderRadius: "8px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#0cc5db",
-              borderRadius: "8px",
-              transition: "background-color 0.3s",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: "#099fb3",
-            },
-            scrollbarWidth: "thin",
-            scrollbarColor: "#0cc5db #f1f1f1",
-          }}
-        >
+        <Box sx={scrollBox}>
           {images?.length > 0 ? (
             <StandardImageList
               navigate={navigate}

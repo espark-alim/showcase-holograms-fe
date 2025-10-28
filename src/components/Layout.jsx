@@ -7,7 +7,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 
 const Layout = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const { mainWrapper, pageWrapper, childrenStyle } =
+  const { mainWrapper, pageWrapper, iconButton, childrenStyle } =
     DASHBOARD_LAYOUT_STYLE || {};
 
   return (
@@ -21,19 +21,7 @@ const Layout = () => {
       />
       <IconButton
         onClick={() => setMobileSidebarOpen((prev) => !prev)}
-        sx={{
-          display: { xs: "flex", md: "none" },
-          position: "absolute",
-          top: 16,
-          right: 16,
-          zIndex: 1300,
-          backgroundColor: "white",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-          "&:hover": {
-            backgroundColor: "primary.main",
-            color: "#fff",
-          },
-        }}
+        sx={iconButton}
       >
         <MenuIcon />
       </IconButton>
@@ -44,12 +32,7 @@ const Layout = () => {
         {/* ------------------------------------------- */}
         {/* Page Route */}
         {/* ------------------------------------------- */}
-        <Box
-          sx={childrenStyle()}
-          initial={{ x: 20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
+        <Box sx={childrenStyle()}>
           <Outlet />
         </Box>
       </Box>

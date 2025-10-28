@@ -1,12 +1,13 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, IconButton, MenuItem, Select } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import DeleteIcon from "@mui/icons-material/Delete";
 import SlowMotionVideoIcon from "@mui/icons-material/SlowMotionVideo";
+import { DYNAMIC_TABLE_STYLE } from "../style";
 
 const STATUS_OPTIONS = ["pending", "approved", "rejected"];
 
 const DynamicDataGrid = ({ rows, columns, onStatusChange, onClick }) => {
+  const { gridBox, grid } = DYNAMIC_TABLE_STYLE || {};
   const enhancedColumns = [
     ...columns.map((col) => ({
       field: col.id,
@@ -60,49 +61,7 @@ const DynamicDataGrid = ({ rows, columns, onStatusChange, onClick }) => {
   ];
 
   return (
-    <Box
-      sx={{
-        maxheight: "80vh",
-        width: "100%",
-        "& .MuiDataGrid-root": {
-          border: "none", // Grid ka border remove
-        },
-        "& .MuiDataGrid-columnHeaderTitleContainer": {
-          justifyContent: "center !important",
-          fontWeight: 600,
-        },
-        "& .MuiDataGrid-columnHeaderTitle": {
-          textAlign: "center !important",
-          width: "100%",
-        },
-        "& .MuiDataGrid-cell": {
-          textAlign: "center !important",
-        },
-        "& .MuiDataGrid-row": {
-          borderBottom: "none !important",
-          borderRadius: "6px",
-          backgroundColor: "#fff",
-          transition: "transform 0.2s ease, box-shadow 0.2s ease",
-          "&:hover": {
-            transform: "scale(1.01)",
-            backgroundColor: "#fff !important",
-            boxShadow: "inset 0px 8px 25px hsla(220, 50%, 10%, 0.09)",
-          },
-        },
-        "& .MuiDataGrid-main": {
-          backgroundColor: "#fff",
-        },
-
-        "& .MuiDataGrid-row.Mui-selected": {
-          backgroundColor: "transparent !important",
-          boxShadow: "inset 0px 8px 25px hsla(220, 50%, 10%, 0.09)",
-        },
-        "& .MuiDataGrid-row.Mui-selected:hover": {
-          backgroundColor: "transparent !important",
-          boxShadow: "inset 0px 8px 25px hsla(220, 50%, 10%, 0.09)",
-        },
-      }}
-    >
+    <Box sx={gridBox}>
       <DataGrid
         rows={rows}
         columns={enhancedColumns}
@@ -115,20 +74,7 @@ const DynamicDataGrid = ({ rows, columns, onStatusChange, onClick }) => {
         pageSizeOptions={[12, 25, 50]}
         getRowId={(row) => row.id}
         hideFooterSelectedRowCount
-        sx={{
-          "& .MuiTablePagination-displayedRows": {
-            display: "none",
-          },
-          "& .MuiTablePagination-root .MuiButtonBase-root": {
-            color: "primary.main",
-          },
-          "& .MuiTablePagination-root .MuiButtonBase-root.Mui-disabled": {
-            color: "accent.main",
-          },
-          "& .MuiTablePagination-root .MuiButtonBase-root:hover": {
-            backgroundColor: "rgba(25, 118, 210, 0.08)",
-          },
-        }}
+        sx={grid}
       />
     </Box>
   );

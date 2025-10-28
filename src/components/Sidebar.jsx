@@ -22,9 +22,6 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose }) => {
           flexShrink: 0,
         }}
       >
-        {/* ------------------------------------------- */}
-        {/* Sidebar for desktop */}
-        {/* ------------------------------------------- */}
         <Drawer
           anchor="left"
           open={true}
@@ -40,9 +37,6 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose }) => {
             },
           }}
         >
-          {/* ------------------------------------------- */}
-          {/* Sidebar Box */}
-          {/* ------------------------------------------- */}
           <SidebarLinks />
         </Drawer>
       </Box>
@@ -63,9 +57,6 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose }) => {
         },
       }}
     >
-      {/* ------------------------------------------- */}
-      {/* Sidebar Box */}
-      {/* ------------------------------------------- */}
       <SidebarLinks />
     </Drawer>
   );

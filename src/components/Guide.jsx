@@ -1,7 +1,9 @@
 import { Box, Stack, Typography } from "@mui/material";
 import GuidImage from "../assets/images/user-guide.png";
+import { GUIDE_DATA } from "../constant";
 
 const Guide = () => {
+  const { text } = GUIDE_DATA || {};
   return (
     <Stack
       minHeight={"fit-content"}
@@ -14,17 +16,15 @@ const Guide = () => {
           letterSpacing={1}
           textAlign={{ xs: "center", md: "start" }}
         >
-          Drag to resize your photo so the faces are large, centered and fully
-          within the red circle (Bodies can extend outside the circle, faces
-          must stay within the circle)
+          {text}
         </Typography>
         <Box
-          component={"img"}
           src={GuidImage}
+          component={"img"}
           sx={{
             mx: "auto",
             width: "90%",
-            maxWidth: "370px",
+            maxWidth: { xs: "300px", md: "370px" },
             height: "fit-content",
           }}
         />

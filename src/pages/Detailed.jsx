@@ -6,6 +6,7 @@ import {
   useUpdatePhotoStatusMutation,
 } from "../services/reviewer";
 import { toast } from "react-toastify";
+import { DETAILED_STYLE } from "../style";
 
 const StandardImageList = ({
   userId = "",
@@ -13,71 +14,25 @@ const StandardImageList = ({
   images = [],
   handleDeleteImage = () => {},
 }) => {
+  const { container, imageBox, image, iconStack, deleteIcon } =
+    DETAILED_STYLE || {};
   return (
-    <Grid
-      container
-      spacing={2}
-      maxWidth={1920}
-      sx={{
-        "@media(max-width: 374px)": {
-          justifyContent: "center",
-        },
-      }}
-    >
+    <Grid container spacing={2} maxWidth={1920} sx={container}>
       {images?.map((item, index) => (
         <Grid item key={index} xs={3} xl={2.4}>
-          <Box
-            sx={{
-              position: "relative",
-              overflow: "hidden",
-              borderRadius: 2,
-              transition: "transform 0.3s ease, box-shadow 0.3s ease",
-              "&:hover": {
-                transform: "scale(1.05)",
-                boxShadow: "0 6px 12px rgba(12, 197, 219, 0.4)",
-              },
-            }}
-          >
+          <Box sx={imageBox}>
             <Box
               component="img"
               src={item?.photo_url}
               alt={`${item?.photo_id}`}
               loading="lazy"
               onClick={() => navigate(`/user/${userId}/${item?.photo_id}`)}
-              sx={{
-                width: "100%",
-                height: { xs: 105, sm: 140, md: 160, lg: 200 },
-                objectFit: "contain",
-                objectPosition: "center",
-                cursor: "pointer",
-                display: "block",
-                "@media(max-width: 374px)": {
-                  width: "100%",
-                  height: "130px",
-                },
-              }}
+              sx={image}
             />
-            <Stack
-              direction={"row"}
-              spacing={1}
-              sx={{
-                position: "absolute",
-                zIndex: 1,
-                top: -2,
-                right: -2,
-                cursor: "pointer",
-              }}
-            >
+            <Stack direction={"row"} spacing={1} sx={iconStack}>
               <HighlightOffIcon
                 onClick={() => handleDeleteImage(item?.photo_id)}
-                sx={{
-                  backgroundColor: "#fff",
-                  borderRadius: "50%",
-                  color: "primary.main",
-                  "&:hover": {
-                    color: "red",
-                  },
-                }}
+                sx={deleteIcon}
               />
             </Stack>
           </Box>
@@ -93,7 +48,7 @@ const Detailed = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { data, refetch, isLoading, isError } = useGetDashboardQuery();
+  const { data, refetch, isLoading } = useGetDashboardQuery();
 
   const users = data?.data || [
     {

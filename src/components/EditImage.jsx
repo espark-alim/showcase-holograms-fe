@@ -12,51 +12,25 @@ import * as faceapi from "face-api.js";
 import Toolbar from "../components/Toolbar";
 import Guide from "../components/Guide";
 import { toast } from "react-toastify";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   useEditImageMutation,
   useGetImageByIdQuery,
 } from "../services/reviewer";
-
-function createImage(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = url;
-  });
-}
-
-async function getCroppedImg(imageSrc, croppedAreaPixels) {
-  const image = await createImage(imageSrc);
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-
-  canvas.width = Math.max(1, Math.floor(croppedAreaPixels.width));
-  canvas.height = Math.max(1, Math.floor(croppedAreaPixels.height));
-
-  ctx.drawImage(
-    image,
-    croppedAreaPixels.x,
-    croppedAreaPixels.y,
-    croppedAreaPixels.width,
-    croppedAreaPixels.height,
-    0,
-    0,
-    croppedAreaPixels.width,
-    croppedAreaPixels.height
-  );
-
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => {
-      resolve({ blob, url: URL.createObjectURL(blob) });
-    }, "image/jpeg");
-  });
-}
+import { createImage, getCroppedImg } from "../services/_utils";
+import { EDIT_IMAGE_STYLE } from "../style";
 
 const EditImage = () => {
+  const {
+    mainBox,
+    gridContainer,
+    toolbarGrid,
+    imageGrid,
+    cropBox,
+    croppedImage,
+    slider,
+    button,
+  } = EDIT_IMAGE_STYLE || {};
   const [cropping, setCropping] = useState(false);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -65,9 +39,7 @@ const EditImage = () => {
   const { id, imageId } = useParams({});
   const [croppedImageUrl, setCroppedImageUrl] = useState(null);
   const [editImage, { isLoading: upLoading }] = useEditImageMutation();
-  const [image, setImage] = useState("");
-  const location = useLocation();
-  const { data, isLoading, isError } = useGetImageByIdQuery({
+  const { data, isLoading } = useGetImageByIdQuery({
     id: imageId,
   });
 
@@ -184,24 +156,9 @@ const EditImage = () => {
   }
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        minHeight: "100%",
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      <Grid
-        container
-        mx="auto"
-        maxWidth="775px"
-        alignItems="center"
-        justifyContent="center"
-        rowGap={3}
-        py={2.5}
-      >
-        <Grid size={12} sx={{ display: "flex", justifyContent: "center" }}>
+    <Box sx={mainBox}>
+      <Grid container sx={gridContainer}>
+        <Grid size={12} sx={toolbarGrid}>
           <Toolbar
             onCrop={setCropping}
             onSave={handleSave}
@@ -210,22 +167,9 @@ const EditImage = () => {
           />
         </Grid>
 
-        <Grid
-          size={12}
-          px={2}
-          sx={{ display: "flex", justifyContent: "center" }}
-        >
+        <Grid size={12} sx={imageGrid}>
           {cropping ? (
-            <Box
-              sx={{
-                position: "relative",
-                mx: "auto",
-                width: "80vw",
-                height: "35vh",
-                minHeight: 250,
-                overflow: "hidden",
-              }}
-            >
+            <Box sx={cropBox}>
               <Cropper
                 image={imageData?.photo_url}
                 crop={crop}
@@ -245,31 +189,9 @@ const EditImage = () => {
               />
             </Box>
           ) : croppedImageUrl ? (
-            <Box
-              component="img"
-              src={croppedImageUrl}
-              sx={{
-                mx: "auto",
-                maxWidth: "90vw",
-                minHeight: "380px",
-                maxHeight: "60vh",
-                objectFit: "contain",
-                display: "block",
-              }}
-            />
+            <Box component="img" src={croppedImageUrl} sx={croppedImage} />
           ) : imageData?.photo_url ? (
-            <Box
-              component="img"
-              src={imageData?.photo_url}
-              sx={{
-                mx: "auto",
-                maxWidth: "90vw",
-                minHeight: "380px",
-                maxHeight: "60vh",
-                objectFit: "contain",
-                display: "block",
-              }}
-            />
+            <Box component="img" src={imageData?.photo_url} sx={croppedImage} />
           ) : (
             <Guide />
           )}
@@ -283,33 +205,17 @@ const EditImage = () => {
                 max={3}
                 step={0.1}
                 onChange={(e, z) => setZoom(z)}
-                sx={{ width: 200 }}
+                sx={slider}
               />
               <Stack direction={"row"} spacing={1.5}>
-                <Button
-                  variant="contained"
-                  onClick={handleCrop}
-                  sx={{
-                    borderRadius: "999px",
-                    textTransform: "none",
-                    boxShadow: "none",
-                    fontWeight: 600,
-                    px: 2.5,
-                  }}
-                >
+                <Button variant="contained" onClick={handleCrop} sx={button}>
                   Save
                 </Button>
                 <Button
                   variant="contained"
                   color="accent"
                   onClick={() => setCropping(false)}
-                  sx={{
-                    borderRadius: "999px",
-                    textTransform: "none",
-                    boxShadow: "none",
-                    fontWeight: 600,
-                    px: 2.5,
-                  }}
+                  sx={button}
                 >
                   Cancel
                 </Button>
@@ -322,13 +228,7 @@ const EditImage = () => {
               onClick={() => navigate(`/user/${id}`)}
               loading={upLoading || isLoading}
               disabled={upLoading || cropping}
-              sx={{
-                borderRadius: "999px",
-                textTransform: "none",
-                boxShadow: "none",
-                fontWeight: 600,
-                px: 2.5,
-              }}
+              sx={button}
             >
               {"Go to back"}
             </Button>

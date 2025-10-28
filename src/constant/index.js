@@ -90,4 +90,10 @@ const SIDEBAR_LINKS = {
   },
 };
 
-export { PATHS, USER_FORM, REVIEWER_FORM, SIDEBAR_LINKS };
+const GUIDE_DATA = {
+  text: `  Drag to resize your photo so the faces are large, centered and fully
+            within the red circle (Bodies can extend outside the circle, faces
+            must stay within the circle)`,
+};
+
+export { PATHS, USER_FORM, REVIEWER_FORM, SIDEBAR_LINKS, GUIDE_DATA };

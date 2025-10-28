@@ -1,7 +1,6 @@
 import {
   Box,
   Avatar,
-  Typography,
   List,
   ListItemButton,
   ListItemIcon,
@@ -19,10 +18,13 @@ import { persistor } from "../store";
 import ConfirmationModal from "./ConfirmationModal";
 import { useState } from "react";
 import TruncatedTooltipText from "./TruncatedTooltipText";
+import { SIDEBAR_LINKS_STYLE } from "../style";
 
 const menuItems = [{ icon: FolderIcon, label: "Users", path: "/dashboard" }];
 
 const Sidebar = () => {
+  const { root, avatarContainer, avatar, listItemButton, listItemIcon } =
+    SIDEBAR_LINKS_STYLE || {};
   const location = useLocation();
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -39,30 +41,10 @@ const Sidebar = () => {
   };
 
   return (
-    <Box
-      sx={{
-        width: 240,
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        py: 3,
-        color: theme.palette.text.primary,
-        backgroundColor: "transparent",
-      }}
-    >
+    <Box sx={root(theme)}>
       <Box>
-        <Box sx={{ textAlign: "center", mb: 3 }}>
-          <Avatar
-            src={DefUser}
-            sx={{
-              width: 75,
-              height: 75,
-              mx: "auto",
-              mb: 1,
-              bgcolor: theme.palette.primary.main,
-            }}
-          />
+        <Box sx={avatarContainer}>
+          <Avatar src={DefUser} sx={avatar(theme)} />
           <TruncatedTooltipText
             text={name}
             maxWidth={140}
@@ -90,21 +72,9 @@ const Sidebar = () => {
                 component={NavLink}
                 to={path}
                 disableRipple
-                sx={{
-                  borderRadius: 2,
-                  my: 1,
-                  mx: 2,
-                  px: 2,
-                  color: "black",
-                  boxShadow: "hsla(220, 50%, 10%, 0.09)  0px 15px 35px -5px",
-                  transition: "all 0.3s ease",
-                }}
+                sx={listItemButton}
               >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 38,
-                  }}
-                >
+                <ListItemIcon sx={listItemIcon}>
                   <Box component={"img"} src={icon} width={24} />
                 </ListItemIcon>
                 <ListItemText
