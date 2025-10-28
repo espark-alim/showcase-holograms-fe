@@ -16,13 +16,10 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useReviewerLoginMutation } from "../services/reviewer";
 import { useDispatch } from "react-redux";
 import { addReviewer } from "../store/slices/image/imageSlice";
+import { useFormik } from "formik";
+import { reviewerValidationSchema } from "../schema/reviewerValidationSchema";
 
 const ReviewerForm = () => {
-  const [reviewer, setReviewer] = useState({
-    username: "",
-    password: "",
-  });
-
   const {
     paperStyle,
     subTitleStyle,
@@ -32,42 +29,38 @@ const ReviewerForm = () => {
     buttonStyle,
   } = USER_FORM_STYLE || {};
   const { title, subTitle, fields, buttonText } = REVIEWER_FORM || {};
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [reviewerLogin, { isLoading }] = useReviewerLoginMutation();
-  const dispatch = useDispatch();
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setReviewer((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
   const handleTogglePassword = () => setShowPassword((prev) => !prev);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const formik = useFormik({
+    initialValues: {
+      username: "",
+      password: "",
+    },
+    validationSchema: reviewerValidationSchema,
+    onSubmit: async (values) => {
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
 
-    // Create FormData object
-    const formData = new FormData();
-    Object.entries(reviewer).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-
-    try {
-      const response = await reviewerLogin(formData).unwrap();
-      console.log("User Data:", response?.access_token);
-      toast.success("Successfully Logged In");
-      localStorage.setItem("token", response?.access_token);
-      dispatch(addReviewer(response));
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Error logging in:", error);
-      toast.error("Failed to login, please try again");
-    }
-  };
+      try {
+        const response = await reviewerLogin(formData).unwrap();
+        toast.success("Successfully Logged In");
+        localStorage.setItem("token", response?.access_token);
+        dispatch(addReviewer(response));
+        navigate("/dashboard");
+      } catch (error) {
+        console.error("Error logging in:", error);
+        toast.error("Failed to login, please try again");
+      }
+    },
+  });
 
   return (
     <Paper elevation={0} sx={paperStyle}>
@@ -76,10 +69,9 @@ const ReviewerForm = () => {
         <Typography {...titleStyle}>{title}</Typography>
       </Typography>
 
-      <Box component="form" onSubmit={handleSubmit} sx={formStyle}>
+      <Box component="form" onSubmit={formik.handleSubmit} sx={formStyle}>
         {fields.map((field) => {
           const isPassword = field.type === "password";
-
           return (
             <TextField
               key={field.name}
@@ -87,15 +79,25 @@ const ReviewerForm = () => {
               placeholder={field.placeholder}
               type={isPassword && showPassword ? "text" : field.type}
               fullWidth
-              required={true}
-              value={reviewer[field.name]}
-              onChange={handleChange}
               label={field.label}
               variant="standard"
               sx={textFieldStyle}
+              value={formik.values[field.name]}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={
+                formik.touched[field.name] && Boolean(formik.errors[field.name])
+              }
+              helperText={
+                formik.touched[field.name] && formik.errors[field.name]
+              }
               InputLabelProps={{
                 required: false,
                 sx: {
+                  color: "#9e9e9e",
+                  "&.Mui-error": {
+                    color: "#9e9e9e",
+                  },
                   "& .MuiFormLabel-asterisk": { display: "none" },
                 },
               }}
@@ -119,6 +121,7 @@ const ReviewerForm = () => {
             />
           );
         })}
+
         <Button
           type="submit"
           variant="contained"
@@ -126,7 +129,6 @@ const ReviewerForm = () => {
           size="large"
           sx={buttonStyle}
           disabled={isLoading}
-          loading={isLoading}
         >
           {buttonText}
         </Button>

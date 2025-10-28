@@ -43,7 +43,7 @@ export default function ConfirmationModal({
               </Typography>
               <Typography
                 id="modal-description"
-                textAlign={"start"}
+                textAlign={{ xs: "center", sm: "start" }}
                 letterSpacing={1}
                 variant="body2"
               >

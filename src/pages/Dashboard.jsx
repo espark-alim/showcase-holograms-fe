@@ -89,22 +89,20 @@ const DashboardPage = () => {
       console.log(`✅ Status of user ${id} updated to ${newStatus}`);
     } catch (err) {
       console.error("❌ Failed to update:", err);
+      toast.error("Status update failed! Please try again.");
     }
   };
 
   const handleCreateVideo = async (data) => {
     const { images } = data || {};
     try {
-      // Just extract the IDs from your images array
       const photo_ids = images?.map((img) => img?.photo_id);
 
-      // Optional check: ensure at least one image
       if (!photo_ids.length) {
-        toast.info("No images to submit.");
+        toast.info("No images to submit");
         return;
       }
 
-      // Create raw JSON payload
       const payload = { photo_ids };
 
       const res = await createVideo({ body: payload }).unwrap();
@@ -137,8 +135,6 @@ const DashboardPage = () => {
       <Typography variant="h5" fontWeight={600} mb={3}>
         Users
       </Typography>
-
-      {/* Dynamic Table */}
       <Box my={3}>
         <DynamicTable
           rows={tableData}

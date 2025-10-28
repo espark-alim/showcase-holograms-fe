@@ -41,7 +41,7 @@ const USER_FORM = {
       name: "phone",
       label: "Phone number",
       placeholder: "Enter Phone Number",
-      type: "number",
+      type: "text",
     },
   ],
 };
