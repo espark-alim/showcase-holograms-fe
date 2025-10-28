@@ -8,9 +8,9 @@ const PATHS = {
   uploadImage: "/uploads/:id",
 
   // ------ reviewer ----------
-  dashboard: "/dashboard",
-  users: "/dashboard/users",
-  userDetail: "/user/:mode",
+  users: "/dashboard",
+  userDetail: "/user/:id",
+  editImageForReviewer: "/user/:id/:imageId",
   setting: "/setting",
 };
 

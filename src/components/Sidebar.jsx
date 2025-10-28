@@ -3,7 +3,6 @@ import SidebarLinks from "./SidebarLinks";
 
 const Sidebar = ({ isMobileSidebarOpen, onSidebarClose }) => {
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up("md"));
-
   const sidebarWidth = 240;
   const scrollbarStyles = {
     "&::-webkit-scrollbar": {

@@ -1,6 +1,5 @@
 import { Box, IconButton } from "@mui/material";
 import { DASHBOARD_LAYOUT_STYLE } from "../style";
-import { motion } from "framer-motion";
 import { useState } from "react";
 import SidebarLayout from "./Sidebar";
 import { Outlet } from "react-router-dom";
@@ -10,7 +9,6 @@ const Layout = () => {
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const { mainWrapper, pageWrapper, childrenStyle } =
     DASHBOARD_LAYOUT_STYLE || {};
-  const MotionBox = motion(Box);
 
   return (
     <Box sx={mainWrapper}>
@@ -46,14 +44,14 @@ const Layout = () => {
         {/* ------------------------------------------- */}
         {/* Page Route */}
         {/* ------------------------------------------- */}
-        <MotionBox
+        <Box
           sx={childrenStyle()}
           initial={{ x: 20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
           <Outlet />
-        </MotionBox>
+        </Box>
       </Box>
     </Box>
   );

@@ -1,9 +1,4 @@
-import {
-  IMAGES,
-  SINGLE_IMAGE,
-  UPLOAD_IMAGE,
-  SUBMIT_IMAGES,
-} from "../api/apiEndPoints";
+import { IMAGES, SINGLE_IMAGE, UPLOAD_IMAGE } from "../api/apiEndPoints";
 import { apiSlice } from "../api/apiSlice";
 
 export const imageApiSlice = apiSlice.injectEndpoints({
@@ -17,7 +12,7 @@ export const imageApiSlice = apiSlice.injectEndpoints({
           Accept: "application/json",
         },
       }),
-      providesTags: (result, error, { id }) => [{ type: "Images", id }],
+      providesTags: ["Images"],
     }),
 
     getSingleImage: builder.query({
@@ -38,7 +33,7 @@ export const imageApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "Images", id }],
+      invalidatesTags: ["Images"],
     }),
 
     adjustImage: builder.mutation({
@@ -47,10 +42,7 @@ export const imageApiSlice = apiSlice.injectEndpoints({
         method: "PUT",
         body: formData,
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "SingleImage", id },
-        { type: "Images", id },
-      ],
+      invalidatesTags: ["Images"],
     }),
 
     deleteImage: builder.mutation({
@@ -58,7 +50,7 @@ export const imageApiSlice = apiSlice.injectEndpoints({
         url: `${SINGLE_IMAGE}${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "Images", id }],
+      invalidatesTags: ["Images"],
     }),
   }),
 });

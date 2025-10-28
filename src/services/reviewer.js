@@ -26,42 +26,56 @@ export const reviewerApiSlice = apiSlice.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-    }),
-
-    editPhoto: builder.mutation({
-      query: ({ id, data }) => ({
-        url: `${REVIEWER_EDIT_PHOTO}${id}`,
-        method: "PUT",
-        body: data,
-      }),
-    }),
-
-    getPhotoById: builder.query({
-      query: (id) => ({
-        url: `${REVIEWER_GET_PHOTO_BY_ID}${id}`,
-        method: "GET",
-      }),
-    }),
-
-    deletePhotoById: builder.mutation({
-      query: (id) => ({
-        url: `${REVIEWER_DELETE_PHOTO_BY_ID}${id}`,
-        method: "DELETE",
-      }),
-    }),
-
-    createVideo: builder.mutation({
-      query: (formData) => ({
-        url: REVIEWER_CREATE_VIDEO,
-        method: "POST",
-        body: formData,
-      }),
+      invalidatesTags: ["users"],
     }),
 
     getDashboard: builder.query({
       query: () => ({
         url: REVIEWER_DASHBOARD,
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      }),
+      providesTags: ["users"],
+    }),
+
+    getImageById: builder.query({
+      query: ({ id }) => ({
+        url: `${REVIEWER_GET_PHOTO_BY_ID}${id}`,
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      }),
+      providesTags: ["single-image"],
+    }),
+
+    editImage: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `${REVIEWER_EDIT_PHOTO}${id}`,
+        method: "PUT",
+        body: formData,
+      }),
+      invalidatesTags: ["single-image"],
+    }),
+
+    deleteImage: builder.mutation({
+      query: ({ id }) => ({
+        url: `${REVIEWER_DELETE_PHOTO_BY_ID}${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["users"],
+    }),
+
+    createVideo: builder.mutation({
+      query: ({ body }) => ({
+        url: `${REVIEWER_CREATE_VIDEO}`,
+        method: "POST",
+        body, // JSON
+        headers: { "Content-Type": "application/json" },
       }),
     }),
   }),
@@ -70,9 +84,9 @@ export const reviewerApiSlice = apiSlice.injectEndpoints({
 export const {
   useReviewerLoginMutation,
   useUpdatePhotoStatusMutation,
-  useEditPhotoMutation,
-  useGetPhotoByIdQuery,
-  useDeletePhotoByIdMutation,
+  useEditImageMutation,
+  useGetImageByIdQuery,
+  useDeleteImageMutation,
   useCreateVideoMutation,
   useGetDashboardQuery,
 } = reviewerApiSlice;

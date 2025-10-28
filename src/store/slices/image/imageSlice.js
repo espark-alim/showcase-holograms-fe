@@ -2,27 +2,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const imageSlice = createSlice({
-  name: "images",
+  name: "reviewer",
   initialState: {
-    list: [],
+    current: {},
   },
   reducers: {
-    addImages: (state, action) => {
-      state.list = action.payload;
+    addReviewer: (state, action) => {
+      state.current = action.payload;
     },
-    addImage: (state, action) => {
-      state.list.push(action.payload);
-    },
-    removeImage: (state, action) => {
-      state.list = state.list.filter((img) => img.id !== action.payload);
-    },
-    clearImages: (state) => {
-      state.list = [];
+    logout: (state) => {
+      state.current = null;
+      localStorage.clear();
     },
   },
 });
 
-export const { addImages, addImage, removeImage, clearImages } =
-  imageSlice.actions;
+export const { addReviewer, logout } = imageSlice.actions;
 
 export default imageSlice.reducer;

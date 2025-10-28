@@ -4,9 +4,9 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SlowMotionVideoIcon from "@mui/icons-material/SlowMotionVideo";
 
-const STATUS_OPTIONS = ["Pending", "Approved", "Rejected"];
+const STATUS_OPTIONS = ["pending", "approved", "rejected"];
 
-const DynamicDataGrid = ({ rows, columns, onStatusChange }) => {
+const DynamicDataGrid = ({ rows, columns, onStatusChange, onClick }) => {
   const enhancedColumns = [
     ...columns.map((col) => ({
       field: col.id,
@@ -44,21 +44,15 @@ const DynamicDataGrid = ({ rows, columns, onStatusChange }) => {
         <Box>
           <IconButton
             color="primary"
-            onClick={() => console.log("View", params.row)}
+            onClick={() => onClick("view", params.row)}
           >
             <VisibilityIcon />
           </IconButton>
           <IconButton
             color="warning"
-            onClick={() => console.log("Edit", params.row)}
+            onClick={() => onClick("edit", params.row)}
           >
             <SlowMotionVideoIcon />
-          </IconButton>
-          <IconButton
-            color="error"
-            onClick={() => console.log("Delete", params.row)}
-          >
-            <DeleteIcon />
           </IconButton>
         </Box>
       ),
@@ -115,9 +109,26 @@ const DynamicDataGrid = ({ rows, columns, onStatusChange }) => {
         disableColumnFilter
         disableColumnMenu
         disableSelectionOnClick
-        pageSize={10}
-        rowsPerPageOptions={[10, 25, 50]}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 12, page: 0 } },
+        }}
+        pageSizeOptions={[12, 25, 50]}
         getRowId={(row) => row.id}
+        hideFooterSelectedRowCount
+        sx={{
+          "& .MuiTablePagination-displayedRows": {
+            display: "none",
+          },
+          "& .MuiTablePagination-root .MuiButtonBase-root": {
+            color: "primary.main",
+          },
+          "& .MuiTablePagination-root .MuiButtonBase-root.Mui-disabled": {
+            color: "accent.main",
+          },
+          "& .MuiTablePagination-root .MuiButtonBase-root:hover": {
+            backgroundColor: "rgba(25, 118, 210, 0.08)",
+          },
+        }}
       />
     </Box>
   );

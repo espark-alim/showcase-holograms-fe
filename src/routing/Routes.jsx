@@ -9,9 +9,12 @@ import Login from "../pages/Login";
 import ReviewerAccess from "./ReviewerAccess";
 import Dashboard from "../pages/Dashboard";
 import Layout from "../components/Layout";
+import Detailed from "../pages/Detailed";
+import EditImage from "../components/EditImage";
 
 const AppRoutes = () => {
-  const { home, uploads, uploadImage, notFound, login, dashboard } = PATHS;
+  const { home, uploads, uploadImage, notFound, login, users, userDetail, editImageForReviewer } =
+    PATHS;
 
   return (
     <Routes>
@@ -24,7 +27,9 @@ const AppRoutes = () => {
       </Route>
       <Route element={<ReviewerAccess />}>
         <Route element={<Layout />}>
-          <Route path={dashboard} element={<Dashboard />} />
+          <Route path={users} element={<Dashboard />} />
+          <Route path={userDetail} element={<Detailed />} />
+          <Route path={editImageForReviewer} element={<EditImage />} />
         </Route>
       </Route>
     </Routes>

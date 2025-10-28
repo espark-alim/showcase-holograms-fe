@@ -1,4 +1,10 @@
-import { Stack, Button, Typography, Box } from "@mui/material";
+import {
+  Stack,
+  Button,
+  Typography,
+  Box,
+  CircularProgress,
+} from "@mui/material";
 import adjust from "../assets/images/adjust.png";
 
 const Toolbar = ({
@@ -6,6 +12,7 @@ const Toolbar = ({
   onSave = () => {},
   onSaveLoading = false,
   addImageLoading = false,
+  onSaveDisabled = false,
 }) => {
   const items = [
     {
@@ -42,17 +49,29 @@ const Toolbar = ({
               color: "primary.main",
             },
           }}
-          onClick={() => onCrop(true)}
+          onClick={() => {
+            if (onSaveLoading || addImageLoading || onSaveDisabled) return;
+            onCrop(true);
+          }}
         >
-          <Box component={"img"} src={adjust} width={38} />
-          <Typography variant="body1">{item.label}</Typography>
+          {onSaveLoading || addImageLoading ? (
+            <CircularProgress size="25px" sx={{ px: 1 }} />
+          ) : (
+            <>
+              <Box component={"img"} src={adjust} width={38} />
+              <Typography variant="body1">
+                {onSaveDisabled ? "Adjusting.." : item.label}
+              </Typography>
+            </>
+          )}
         </Stack>
       ))}
 
       <Button
         variant="contained"
         color="primary"
-        disabled={onSaveLoading && addImageLoading}
+        loading={onSaveLoading || addImageLoading}
+        disabled={onSaveDisabled}
         sx={{
           borderRadius: "999px",
           textTransform: "none",

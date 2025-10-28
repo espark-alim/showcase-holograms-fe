@@ -1,16 +1,3 @@
-// import { configureStore } from "@reduxjs/toolkit";
-// import { apiSlice } from "../api/apiSlice";
-// import imagesReducer from "./slices/image/imageSlice";
-
-// export const store = configureStore({
-//   reducer: {
-//     [apiSlice.reducerPath]: apiSlice.reducer,
-//     images: imagesReducer,
-//   },
-//   middleware: (getDefaultMiddleware) =>
-//     getDefaultMiddleware().concat(apiSlice.middleware),
-// });
-
 import { configureStore } from "@reduxjs/toolkit";
 import { apiSlice } from "../api/apiSlice";
 import imagesReducer from "./slices/image/imageSlice";
@@ -20,7 +7,7 @@ import storage from "redux-persist/lib/storage"; // uses localStorage
 
 // Persist config only for images slice
 const persistConfig = {
-  key: "images",
+  key: "reviewer",
   storage,
 };
 
@@ -30,7 +17,7 @@ const persistedImagesReducer = persistReducer(persistConfig, imagesReducer);
 export const store = configureStore({
   reducer: {
     [apiSlice.reducerPath]: apiSlice.reducer,
-    images: persistedImagesReducer, // persisted slice
+    reviewer: persistedImagesReducer, // persisted slice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

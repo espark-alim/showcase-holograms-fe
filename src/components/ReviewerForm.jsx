@@ -10,10 +10,12 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { REVIEWER_FORM, USER_FORM } from "../constant";
+import { REVIEWER_FORM } from "../constant";
 import { USER_FORM_STYLE } from "../style";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useReviewerLoginMutation } from "../services/reviewer";
+import { useDispatch } from "react-redux";
+import { addReviewer } from "../store/slices/image/imageSlice";
 
 const ReviewerForm = () => {
   const [reviewer, setReviewer] = useState({
@@ -33,6 +35,7 @@ const ReviewerForm = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [reviewerLogin, { isLoading }] = useReviewerLoginMutation();
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,6 +61,7 @@ const ReviewerForm = () => {
       console.log("User Data:", response?.access_token);
       toast.success("Successfully Logged In");
       localStorage.setItem("token", response?.access_token);
+      dispatch(addReviewer(response));
       navigate("/dashboard");
     } catch (error) {
       console.error("Error logging in:", error);
@@ -115,7 +119,6 @@ const ReviewerForm = () => {
             />
           );
         })}
-
         <Button
           type="submit"
           variant="contained"

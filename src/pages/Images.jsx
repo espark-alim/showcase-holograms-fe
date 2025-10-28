@@ -1,16 +1,21 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import { useLocation, useNavigate } from "react-router-dom";
-import Guide from "../components/Guide";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "react-toastify";
-import * as faceapi from "@vladmandic/face-api";
 import {
-  useDeleteImageMutation,
-  useGetImagesQuery,
-  useUploadImageMutation,
-} from "../services/image";
+  Box,
+  Button,
+  CircularProgress,
+  LinearProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import { useNavigate } from "react-router-dom";
+import Guide from "../components/Guide";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
+import * as faceapi from "face-api.js";
+import { useDeleteImageMutation, useGetImagesQuery } from "../services/image";
 import { useSubmitImagesMutation } from "../services/processImage";
+import { useDispatch } from "react-redux";
+import { apiSlice } from "../api/apiSlice";
 
 const StandardImageList = ({
   navigate,
@@ -66,8 +71,7 @@ const StandardImageList = ({
               objectFit: "contain",
               objectPosition: "center",
             }}
-            // src={item?.photo_url}
-            src={item?.src}
+            src={item?.photo_url}
             alt={`${item?.photo_id}`}
             loading="lazy"
           />
@@ -101,201 +105,23 @@ const StandardImageList = ({
 };
 
 const Images = () => {
-  const [testImages, setTestImages] = useState([]);
-
-  const [modelsLoaded, setModelsLoaded] = useState(false);
-  const [loadingDetect, setLoadingDetect] = useState(false);
   const id = localStorage.getItem("accessToken");
-
-  const [uploadImage, { isLoading: upLoading }] = useUploadImageMutation();
+  const [modelsLoaded, setModelsLoaded] = useState(false);
   const [deleteImage, { isLoading: deleteLoading }] = useDeleteImageMutation();
   const [submitImages, { isLoading: submitLoading }] =
     useSubmitImagesMutation();
+
   const { data, isLoading, isError } = useGetImagesQuery({
     id: id,
   });
 
-  const images = testImages;
-  // const images = data?.data;
-
-  const location = useLocation();
-  const initialFile = location.state?.file;
-  const fileInputRef = useRef(null);
+  const images = data?.data;
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const MAX_IMAGES = 30;
+  const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    if (initialFile) {
-      const url = URL.createObjectURL(initialFile);
-      const imgObj = {
-        file: initialFile,
-        url,
-        faceDetected: null,
-        facesCount: 0,
-      };
-      console.log("Initial file added:", imgObj);
-    }
-  }, [initialFile]);
-
-  // useEffect(() => {
-  //   (async () => {
-  //     try {
-  //       const MODEL_URL = "/models";
-  //       await Promise.all([
-  //         faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-  //         faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-  //         faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-  //       ]);
-  //       setModelsLoaded(true);
-  //     } catch (err) {
-  //       console.error("Failed to load face-api models", err);
-  //       toast.error("Face detection models failed to load");
-  //     }
-  //   })();
-  // }, []);
-
-  function createImage(url) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.addEventListener("load", () => resolve(img));
-      img.addEventListener("error", (error) => reject(error));
-      img.setAttribute("crossOrigin", "anonymous");
-      img.src = url;
-    });
-  }
-
-  // const detectFacesInFile = useCallback(async (file) => {
-  //   const url = URL.createObjectURL(file);
-  //   try {
-  //     const img = await createImage(url);
-  //     const detections = await faceapi
-  //       .detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
-  //       .withFaceLandmarks();
-
-  //     return {
-  //       facesCount: detections.length,
-  //       faceDetected: detections.length > 0,
-  //     };
-  //   } catch (err) {
-  //     console.error("Face detection failed for", file.name, err);
-  //     return { facesCount: 0, faceDetected: false, error: true };
-  //   } finally {
-  //     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  //   }
-  // }, []);
-
-  const handleUploadImage = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    if (images?.length + files?.length > MAX_IMAGES) {
-      toast.info(`You can only upload up to ${MAX_IMAGES} images.`);
-      e.target.value = "";
-      return;
-    }
-
-    if (!modelsLoaded) {
-      toast.info(`Face detection models are still loading. Please wait.`);
-      e.target.value = "";
-      return;
-    }
-
-    setLoadingDetect(true);
-    const results = await Promise.all(
-      files.map(async (file) => {
-        const faceResult = await detectFacesInFile(file);
-        return {
-          file,
-          faceDetected: faceResult.faceDetected,
-          facesCount: faceResult.facesCount,
-        };
-      })
-    );
-    setLoadingDetect(false);
-
-    const valid = results.filter((r) => r.faceDetected);
-    const invalid = results.filter((r) => !r.faceDetected);
-
-    if (invalid.length > 0) {
-      toast.info(`${invalid.length} image(s) skipped (no face detected).`);
-    }
-
-    for (const item of valid) {
-      if (!item.file || !(item.file instanceof File)) {
-        toast.error("Invalid file!");
-        continue;
-      }
-      const formData = new FormData();
-      formData.append("files", item.file);
-
-      try {
-        const res = await uploadImage({ id, formData }).unwrap();
-        if (res.success) {
-          toast.success("Image uploaded successfully!");
-        }
-      } catch (err) {
-        toast.error("Image upload failed!");
-        console.error(err);
-      }
-    }
-
-    e.target.value = "";
-  };
-
-  const handleDeleteImage = async (id) => {
-    try {
-      const res = await deleteImage({ id }).unwrap();
-      if (res?.data) {
-        toast.success("Image deleted successfully!");
-      }
-    } catch (err) {
-      toast.error("Image delete failed!");
-      console.error(err);
-    }
-  };
-
-  const handleSubmit = async () => {
-    // if (!images?.length) {
-    //   toast.info("No images to submit.");
-    //   return;
-    // }
-
-    // const allValid = images.every((i) => i.faceDetected === true);
-    // if (!allValid) {
-    //   toast.info("Some images have no detected faces.");
-    //   return;
-    // }
-
-    try {
-      // Just extract the IDs from your images array
-      const photo_ids = images.map((img) => img.photo_id);
-
-      // Optional check: ensure at least one image
-      if (!photo_ids.length) {
-        toast.info("No images to submit.");
-        return;
-      }
-
-      // Create raw JSON payload
-      const payload = { photo_ids };
-
-      const res = await submitImages({ id, body: payload }).unwrap();
-
-      if (res) {
-        toast.success(`Thank you! Your photos are submitted`);
-        setTimeout(() => {
-          toast.info(`We’ll email you when your holograms are ready`);
-        }, 5000);
-        console.log("Server Response:", res.data);
-      }
-    } catch (err) {
-      // console.error("Submit failed:", err);
-      // toast.error("Image submission failed!");
-      toast.success(`Thank you! Your photos are submitted`);
-      setTimeout(() => {
-        toast.info(`We’ll email you when your holograms are ready`);
-      }, 5000);
-    }
+  const handleClick = () => {
+    fileInputRef.current.click();
   };
 
   useEffect(() => {
@@ -309,7 +135,6 @@ const Images = () => {
     loadModels();
   }, []);
 
-  // ------------------ Load Image Utility ------------------
   const loadImage = (src) =>
     new Promise((resolve) => {
       const img = new Image();
@@ -318,88 +143,75 @@ const Images = () => {
       img.src = src;
     });
 
-  // ------------------ Handle Upload ------------------
-  const handleUpload = async (e) => {
-    const files = Array.from(e.target.files).slice(0, 30);
-    if (!files.length) return;
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
     if (!modelsLoaded) {
-      alert("Please wait, models are still loading...");
+      toast.info("Please wait, face detection is loading...");
       return;
     }
 
-    // setLoading(true);
-    const validImages = [];
+    const imageURL = URL.createObjectURL(file);
+    const img = await loadImage(imageURL);
 
-    for (const file of files) {
-      const fileKey = `${file.name}_${file.size}`;
-      const alreadyExists = testImages.some((img) => img.key === fileKey);
-      if (alreadyExists) continue;
+    try {
+      const detections = await faceapi.detectAllFaces(
+        img,
+        new faceapi.TinyFaceDetectorOptions()
+      );
 
-      const imgURL = URL.createObjectURL(file);
-      const img = await loadImage(imgURL);
-
-      try {
-        const detections = await faceapi
-          .detectAllFaces(
-            img,
-            new faceapi.TinyFaceDetectorOptions({
-              inputSize: 512,
-              scoreThreshold: 0.5,
-            })
-          )
-          .withFaceLandmarks();
-
-        if (detections.length) {
-          // 🔹 Only up to 2 faces
-          const faces = detections.slice(0, 2);
-
-          for (let i = 0; i < faces.length; i++) {
-            const { box } = faces[i].detection;
-            if (box.width < 50 || box.height < 50) continue; // skip tiny faces
-
-            const cropBox = {
-              x: Math.max(box.x - box.width * 0.3, 0),
-              y: Math.max(box.y - box.height * 0.6, 0),
-              width: box.width * 1.6,
-              height: box.height * 2.0,
-            };
-
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-
-            canvas.width = cropBox.width;
-            canvas.height = cropBox.height;
-
-            ctx.drawImage(
-              img,
-              cropBox.x,
-              cropBox.y,
-              cropBox.width,
-              cropBox.height,
-              0,
-              0,
-              cropBox.width,
-              cropBox.height
-            );
-
-            const croppedDataUrl = canvas.toDataURL("image/jpeg");
-            validImages.push({
-              key: `${fileKey}_face${i}`,
-              src: croppedDataUrl,
-            });
-          }
-        }
-      } catch (err) {
-        console.error("Face detection failed:", err);
+      if (detections.length === 0) {
+        toast.error("No human face detected. Please try another photo.");
+        return;
       }
-    }
 
-    setTestImages((prev) => [...prev, ...validImages]);
-    // setLoading(false);
+      navigate("/uploads/image", { state: { file } });
+    } catch (error) {
+      console.error("Face detection failed:", error);
+      toast.error("Error detecting face. Please try again.");
+    } finally {
+      URL.revokeObjectURL(imageURL);
+    }
   };
 
-  // if (isLoading) return <Typography>Loading images...</Typography>;
-  // if (isError) return <Typography>Error loading images</Typography>;
+  const handleDeleteImage = async (id) => {
+    try {
+      const res = await deleteImage({ id }).unwrap();
+      if (res?.data) {
+        toast.success("Image deleted successfully!");
+        dispatch(apiSlice.util.invalidateTags(["Images"]));
+      }
+    } catch (err) {
+      toast.error("Image delete failed!");
+      console.error(err);
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const photo_ids = images?.map((img) => img?.photo_id);
+
+      if (!photo_ids?.length) {
+        toast.info("No images to submit");
+        return;
+      }
+
+      const payload = { photo_ids };
+      const res = await submitImages({ id, body: payload }).unwrap();
+
+      if (res) {
+        toast.success(`Thank you! Your photos are submitted`);
+        setTimeout(() => {
+          toast.info(`We’ll email you when your holograms are ready`);
+        }, 5000);
+        console.log("Server Response:", res.data);
+      }
+    } catch (err) {
+      console.error("Submit failed:", err);
+      toast.error("Image submission failed!");
+    }
+  };
 
   return (
     <Stack
@@ -419,42 +231,44 @@ const Images = () => {
             </Typography>
           </Stack>
 
-          <Stack direction="row" justifyContent="center" spacing={1.5}>
+          <Stack
+            direction="row"
+            justifyContent="center"
+            spacing={{ xs: 1, sm: 1.5 }}
+          >
             <Button
               variant="contained"
               color="accent"
-              onClick={() => fileInputRef.current.click()}
-              loading={upLoading}
-              disabled={images?.length === MAX_IMAGES}
+              onClick={handleClick}
               sx={{
                 borderRadius: "999px",
                 textTransform: "none",
                 boxShadow: "none",
                 fontWeight: 600,
-                px: 2.5,
+                fontSize: { xs: "12px", md: "16px" },
+                px: { xs: 1.5, sm: 2.5 },
               }}
             >
               Upload Photos
             </Button>
             <input
-              ref={fileInputRef}
               type="file"
-              multiple
               accept="image/*"
+              ref={fileInputRef}
               style={{ display: "none" }}
-              onChange={handleUpload}
+              onChange={handleFileChange}
             />
             <Button
               variant="contained"
               onClick={handleSubmit}
               loading={submitLoading}
-              disabled={upLoading}
               sx={{
                 borderRadius: "999px",
                 textTransform: "none",
                 boxShadow: "none",
                 fontWeight: 600,
-                px: 2.5,
+                fontSize: { xs: "12px", md: "16px" },
+                px: { xs: 1.5, sm: 2.5 },
               }}
             >
               Submit Photos
@@ -489,6 +303,8 @@ const Images = () => {
               images={images}
               handleDeleteImage={handleDeleteImage}
             />
+          ) : isLoading ? (
+            <CircularProgress size={"30px"} />
           ) : (
             <Guide />
           )}

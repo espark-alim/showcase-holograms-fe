@@ -120,7 +120,7 @@ const DASHBOARD_LAYOUT_STYLE = {
   },
   childrenStyle: () => ({
     flexGrow: 1,
-    overflowY: "hidden",
+    // overflowY: "hidden",
     overflowX: "hidden",
     backgroundColor: "#fff",
     px: 3,
