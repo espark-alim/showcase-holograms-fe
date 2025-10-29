@@ -114,37 +114,48 @@ const EditImage = () => {
   const handleSave = useCallback(
     async (blob, url) => {
       try {
-        function blobToFileObject(blob, blobUrl) {
+        const formData = new FormData();
+
+        const blobToFileObject = (blob, blobUrl) => {
           const fileType = blob.type || "application/octet-stream";
           const extension = fileType.split("/")[1] || "bin";
           const fileName = `image_${Date.now()}.${extension}`;
           const file = new File([blob], fileName, { type: fileType });
+          return { file, url: blobUrl };
+        };
 
-          return {
-            file,
-            url: blobUrl,
-          };
+        if (blob && url) {
+          const result = blobToFileObject(blob, url);
+          formData.append("file", result.file);
+        } else {
+          const response = await fetch(imageData?.photo_url);
+          const blobFromUrl = await response.blob();
+
+          const fileType = blobFromUrl.type || "application/octet-stream";
+          const extension = fileType.split("/")[1] || "bin";
+          const fileName = `image_${Date.now()}.${extension}`;
+          const fileFromUrl = new File([blobFromUrl], fileName, {
+            type: fileType,
+          });
+
+          formData.append("file", fileFromUrl);
         }
-
-        const result = blobToFileObject(blob, url);
-        const formData = new FormData();
-        formData.append("file", result?.file);
 
         const res = await editImage({ id, formData }).unwrap();
 
         if (res?.data) {
-          toast.success("Cropped image uploaded successfully!");
+          toast.success("Image uploaded successfully!");
           setCropping(false);
-          setTimeout(() => {
-            navigate("/uploads");
-          }, 3000);
+          navigate(`/user/${id}`);
+        } else {
+          toast.error("Upload failed!");
         }
       } catch (err) {
         console.error("Upload error:", err);
         toast.error("Something went wrong during upload");
       }
     },
-    [id, setCropping]
+    [editImage, id, imageData, navigate, setCropping]
   );
 
   const onCropComplete = useCallback((_, croppedPixels) => {

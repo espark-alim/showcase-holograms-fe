@@ -6,7 +6,7 @@ export const prepareHeaders = (headers) => {
   return headers;
 };
 
-export const baseUrl = import.meta.env.VITE_API_BASE;
+export const baseUrl = import.meta.env.VITE_API_BASE || 'https://d3ad1855105c.ngrok-free.app/api/v1';
 
 export function createImage(url = "") {
   return new Promise((resolve, reject) => {

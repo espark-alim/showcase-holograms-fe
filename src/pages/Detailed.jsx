@@ -2,8 +2,8 @@ import { Box, Grid, LinearProgress, Stack, Typography } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import {
+  useDeleteImageForReviewerMutation,
   useGetDashboardQuery,
-  useUpdatePhotoStatusMutation,
 } from "../services/reviewer";
 import { toast } from "react-toastify";
 import { DETAILED_STYLE } from "../style";
@@ -44,7 +44,7 @@ const StandardImageList = ({
 
 const Detailed = () => {
   const [deleteImage, { isLoading: deleteLoading }] =
-    useUpdatePhotoStatusMutation();
+    useDeleteImageForReviewerMutation();
   const { id } = useParams();
   const navigate = useNavigate();
 

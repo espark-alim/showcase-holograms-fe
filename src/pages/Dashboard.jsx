@@ -64,12 +64,13 @@ const DashboardPage = () => {
     },
   ];
 
-  const tableData = users?.map(({ status, user }) => ({
+  const tableData = users?.map(({ photo_id, status, user }) => ({
     id: user?.user_id,
     name: user?.first_name,
     email: user?.email,
     phone: user?.phone,
     status: status,
+    photo_id: photo_id,
   }));
 
   const tableColumns = [
@@ -94,9 +95,11 @@ const DashboardPage = () => {
   };
 
   const handleCreateVideo = async (data) => {
-    const { images } = data || {};
+    const userImages = users?.filter(
+      (item) => item?.user?.user_id === Number(data.id)
+    );
     try {
-      const photo_ids = images?.map((img) => img?.photo_id);
+      const photo_ids = userImages?.map((img) => img?.photo_id);
 
       if (!photo_ids.length) {
         toast.info("No images to submit");
@@ -118,7 +121,6 @@ const DashboardPage = () => {
   };
 
   const handleClickAction = (text, data) => {
-    console.log(text, data);
     if (text === "view") {
       navigate(`/user/${data?.id}`);
     } else if (text === "edit") {

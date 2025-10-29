@@ -23,7 +23,7 @@ export const reviewerApiSlice = apiSlice.injectEndpoints({
     updatePhotoStatus: builder.mutation({
       query: ({ id, data }) => ({
         url: `${REVIEWER_UPDATE_PHOTO_STATUS}${id}`,
-        method: "PATCH",
+        method: "PUT",
         body: data,
       }),
       invalidatesTags: ["users"],
@@ -62,7 +62,7 @@ export const reviewerApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ["single-image"],
     }),
 
-    deleteImage: builder.mutation({
+    deleteImageForReviewer: builder.mutation({
       query: ({ id }) => ({
         url: `${REVIEWER_DELETE_PHOTO_BY_ID}${id}`,
         method: "DELETE",
@@ -86,7 +86,7 @@ export const {
   useUpdatePhotoStatusMutation,
   useEditImageMutation,
   useGetImageByIdQuery,
-  useDeleteImageMutation,
+  useDeleteImageForReviewerMutation,
   useCreateVideoMutation,
   useGetDashboardQuery,
 } = reviewerApiSlice;

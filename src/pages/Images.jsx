@@ -17,11 +17,7 @@ import { useDispatch } from "react-redux";
 import { apiSlice } from "../api/apiSlice";
 import { IMAGES_STYLE } from "../style";
 
-const StandardImageList = ({
-  navigate,
-  images = [],
-  handleDeleteImage = () => {},
-}) => {
+const StandardImageList = ({ images = [], handleDeleteImage = () => {} }) => {
   const { imageListContainer, imageBox, image, deleteIconStack, deleteIcon } =
     IMAGES_STYLE || {};
   return (
@@ -29,7 +25,6 @@ const StandardImageList = ({
       {images?.map((item, index) => (
         <Box key={index} sx={imageBox}>
           <Box
-            onClick={() => navigate(`/uploads/${item?.photo_id}`)}
             component="img"
             sx={image}
             src={item?.photo_url}
@@ -206,7 +201,6 @@ const Images = () => {
         <Box sx={scrollBox}>
           {images?.length > 0 ? (
             <StandardImageList
-              navigate={navigate}
               images={images}
               handleDeleteImage={handleDeleteImage}
             />

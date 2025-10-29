@@ -94,37 +94,36 @@ const Upload = () => {
   const handleSave = useCallback(
     async (blob, url) => {
       try {
-        function blobToFileObject(blob, blobUrl) {
+        const formData = new FormData();
+
+        if (blob && url) {
           const fileType = blob.type || "application/octet-stream";
           const extension = fileType.split("/")[1] || "bin";
           const fileName = `image_${Date.now()}.${extension}`;
           const file = new File([blob], fileName, { type: fileType });
-          return { file, url: blobUrl };
+
+          formData.append("files", file);
+        } else {
+          formData.append("files", initialFile);
         }
 
-        const result = blobToFileObject(blob, url);
-        const formData = new FormData();
-        formData.append("files", result?.file);
-
         const res = await uploadImage({ id, formData }).unwrap();
+
         if (res?.data) {
-          toast.success("Cropped image uploaded successfully!");
+          toast.success("Image uploaded successfully!");
           setCropping(false);
           dispatch(apiSlice.util.invalidateTags(["Images"]));
-          setTimeout(() => navigate("/uploads"), 3000);
-        } else toast.error("Upload failed!");
+          setTimeout(() => navigate("/uploads"), 1000);
+        } else {
+          toast.error("Upload failed!");
+        }
       } catch (err) {
         console.error("Upload error:", err);
         toast.error("Something went wrong during upload");
       }
     },
-    [uploadImage, id, setCropping]
+    [uploadImage, id, initialFile, setCropping, navigate, dispatch]
   );
-
-  const onCropAndSave = async () => {
-    const result = await handleCrop();
-    if (result) await handleSave(result.blob, result.url);
-  };
 
   const onCropComplete = useCallback((_, croppedPixels) => {
     setCroppedAreaPixels(croppedPixels);
@@ -137,7 +136,7 @@ const Upload = () => {
           {image && (
             <Toolbar
               onCrop={setCropping}
-              onSave={onCropAndSave}
+              onSave={handleSave}
               onSaveLoading={upLoading}
               onSaveDisabled={cropping}
             />

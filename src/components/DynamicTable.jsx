@@ -22,7 +22,9 @@ const DynamicDataGrid = ({ rows, columns, onStatusChange, onClick }) => {
               <Select
                 size="small"
                 value={params.value}
-                onChange={(e) => onStatusChange(params.row.id, e.target.value)}
+                onChange={(e) =>
+                  onStatusChange(params.row.photo_id, e.target.value)
+                }
                 sx={{ width: "100%", fontSize: 14 }}
               >
                 {STATUS_OPTIONS.map((option) => (
